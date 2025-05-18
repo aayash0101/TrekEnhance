@@ -159,7 +159,70 @@ class _SignupviewState extends State<Signupview> {
                           ),
                         ),
                       ),
-                      
+                      const SizedBox(height: 70),
+                      GestureDetector(
+                        onTap: _handleSignup,
+                        child: Container(
+                          height: 50,
+                          width: 300,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color.fromARGB(255, 217, 51, 13),
+                                Color.fromARGB(255, 12, 16, 12),
+                              ],
+                            ),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 30,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 100),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Text(
+                              "Already Have An Account?",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const Firstview(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Sign In",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                  decoration: TextDecoration.underline
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
