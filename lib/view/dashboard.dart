@@ -84,7 +84,58 @@ class Dashboard extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Followers and Following
-            
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Column(
+                    children: [
+                      Text(
+                        '0',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text('Followers'),
+                    ],
+                  ),
+                  SizedBox(width: 40),
+                  Column(
+                    children: [
+                      Text(
+                        '0',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      Text('Following'),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 30),
+
+              // Trail Journal Box
+              Container(
+                width: double.infinity,
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Build your trail journal',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Use Navigator on the trail to relive all your activities,\nphotos, reviews and more',
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 16),
+                      Icon(Icons.circle, size: 10, color: Colors.black),
+                    ],
                   ),
                 ),
               ),
