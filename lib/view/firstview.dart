@@ -186,7 +186,38 @@ class _FirstView extends State<Firstview> {
                             ),
                           ),
                         ),
-                      
+                      const SizedBox(height: 50),
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children:  [
+                            const Text(
+                              "Don't have an account?",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: (){
+                                Navigator.push(
+                                  context, 
+                                  MaterialPageRoute(
+                                    builder: (context) =>  Signupview()));
+                              },
+                              child: const Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                  decoration: TextDecoration.underline
+                                ),
+                                
+                              ),
+                            ),
                           ],
                         ),
                       ),
