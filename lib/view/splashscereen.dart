@@ -47,7 +47,7 @@ class _SplashscereenState extends State<Splashscereen>
           child: SizedBox(
             height: 200,
             width: 200,
-            child: Image.asset('lib/view/assets/images/ab.png'),
+            child: Image.asset('assets/images/ab.png'),
           ),
         ),
       ),
