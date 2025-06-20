@@ -38,6 +38,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+
   bloc:
     dependency: transitive
     description:
@@ -46,6 +47,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.0.0"
+
   boolean_selector:
     dependency: transitive
     description:
@@ -54,6 +56,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+
   build:
     dependency: transitive
     description:
@@ -230,6 +233,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.3"
+<<<<<<< HEAD
   ffi:
     dependency: transitive
     description:
@@ -254,6 +258,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+=======
+>>>>>>> Sprint/3
   flutter:
     dependency: "direct main"
     description: flutter
@@ -802,6 +808,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.0.0"
+<<<<<<< HEAD
   watcher:
     dependency: transitive
     description:
@@ -850,6 +857,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.3"
+=======
+>>>>>>> Sprint/3
 sdks:
   dart: ">=3.8.0 <4.0.0"
   flutter: ">=3.27.0"
