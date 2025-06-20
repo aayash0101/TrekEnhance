@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application_trek_e/view/firstview.dart';
+import 'package:flutter_application_trek_e/features/auth/presentation/view/login_view.dart';
 
 class Splashscereen extends StatefulWidget {
   const Splashscereen({super.key});
@@ -18,7 +18,7 @@ class _SplashscereenState extends State<Splashscereen>
     Future.delayed(const Duration(seconds: 5), () {
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const Firstview()));
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginView()));
     });
   }
 

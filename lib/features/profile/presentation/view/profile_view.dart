@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_trek_e/view/dashboard.dart';
+import 'package:flutter_application_trek_e/features/home/presentation/view/bottom_view/dashboard_view.dart';
+
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
