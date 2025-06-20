@@ -5,7 +5,6 @@ import 'package:flutter_application_trek_e/features/splash/presentation/view/spl
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class App extends StatelessWidget {
   const App({super.key});
 
