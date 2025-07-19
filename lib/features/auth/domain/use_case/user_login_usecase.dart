@@ -24,7 +24,7 @@ class UserLoginUsecase implements UsecaseWithParams<String, LoginParams> {
 
   @override
   Future<Either<Failure, String>> call(LoginParams params) async {
-    return await _userRepository.loginStudent(
+    return await _userRepository.loginUser(
       params.username,
       params.password,
     );

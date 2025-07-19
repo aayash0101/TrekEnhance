@@ -8,13 +8,13 @@ import 'package:flutter_application_trek_e/features/auth/domain/repository/user_
 
 
 class UserGetCurrentUsecase implements UsecaseWithoutParams<UserEntity> {
-  final IUserRepository _studentRepository;
+  final IUserRepository _userRepository;
 
-  UserGetCurrentUsecase({required IUserRepository studentRepository})
-    : _studentRepository = studentRepository;
+  UserGetCurrentUsecase({required IUserRepository userRepository})
+    : _userRepository = userRepository;
 
   @override
   Future<Either<Failure, UserEntity>> call() {
-    return _studentRepository.getCurrentUser();
+    return _userRepository.getCurrentUser();
   }
 }

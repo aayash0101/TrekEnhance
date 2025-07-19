@@ -18,22 +18,22 @@ class UserRepositoryImpl implements IUserRepository {
   Future<Either<Failure, void>> registerUser(UserEntity user) async {
     try {
       await remoteDataSource.registerUser(user);
-      // Optionally cache locally
+      // Optionally cache locally for offline use
       await localDataSource.registerUser(user);
       return const Right(null);
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(RemoteDatabaseFailure(message: e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, String>> loginStudent(String username, String password) async {
+  Future<Either<Failure, String>> loginUser(String username, String password) async {
     try {
       final token = await remoteDataSource.loginUser(username, password);
-      // Optionally save logged-in user info locally, e.g., in Hive
+      // Optionally you could cache user data locally here too
       return Right(token);
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(RemoteDatabaseFailure(message: e.toString()));
     }
   }
 
@@ -43,23 +43,23 @@ class UserRepositoryImpl implements IUserRepository {
       final imageUrlOrName = await remoteDataSource.uploadProfilePicture(file);
       return Right(imageUrlOrName);
     } catch (e) {
-      return Left(Failure(message: e.toString()));
+      return Left(RemoteDatabaseFailure(message: e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      // Try local first (fast + offline)
+      // Try from local cache first
       final user = await localDataSource.getCurrentUser();
       return Right(user);
     } catch (_) {
       try {
-        // Fallback to remote (needs /me or /profile endpoint)
+        // Fallback to remote API
         final user = await remoteDataSource.getCurrentUser();
         return Right(user);
       } catch (e) {
-        return Left(Failure(message: e.toString()));
+        return Left(RemoteDatabaseFailure(message: e.toString()));
       }
     }
   }

@@ -13,13 +13,13 @@ class UploadImageParams {
 
 class UploadImageUsecase
     implements UsecaseWithParams<String, UploadImageParams> {
-  final IUserRepository _studentRepository;
+  final IUserRepository _userRepository;
 
-  UploadImageUsecase({required IUserRepository studentRepository})
-    : _studentRepository = studentRepository;
+  UploadImageUsecase({required IUserRepository userRepository})
+    : _userRepository = userRepository;
 
   @override
   Future<Either<Failure, String>> call(UploadImageParams params) {
-    return _studentRepository.uploadProfilePicture(params.file);
+    return _userRepository.uploadProfilePicture(params.file);
   }
 }
