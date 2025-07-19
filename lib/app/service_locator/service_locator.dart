@@ -11,8 +11,6 @@ import 'package:flutter_application_trek_e/features/home/presentation/view_model
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
 import 'package:get_it/get_it.dart';
 
-
-
 final GetIt serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
@@ -26,42 +24,45 @@ Future<void> _initHiveService() async {
   serviceLocator.registerLazySingleton(() => HiveService());
 }
 
-
 Future<void> _initAuthModule() async {
+  // 📡 Local data source
   serviceLocator.registerFactory(
-    () => UserLocalDatasource(hiveService: serviceLocator<HiveService>()),
+    () => UserLocalDataSource(hiveService: serviceLocator<HiveService>()),
   );
 
+  // 🧩 Local repository (implements IUserRepository)
   serviceLocator.registerFactory(
     () => UserLocalRepository(
-      userLocalDatasource: serviceLocator<UserLocalDatasource>(),
+      userLocalDatasource: serviceLocator<UserLocalDataSource>(),
     ),
   );
 
+  // 📦 Use cases
   serviceLocator.registerFactory(
     () => UserLoginUsecase(
-      studentRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserLocalRepository>(),
     ),
   );
 
   serviceLocator.registerFactory(
     () => UserRegisterUsecase(
-      studentRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserLocalRepository>(),
     ),
   );
 
   serviceLocator.registerFactory(
     () => UploadImageUsecase(
-      studentRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserLocalRepository>(),
     ),
   );
 
   serviceLocator.registerFactory(
     () => UserGetCurrentUsecase(
-      studentRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserLocalRepository>(),
     ),
   );
 
+  // 🧠 ViewModels
   serviceLocator.registerFactory(
     () => RegisterViewModel(
       serviceLocator<UserRegisterUsecase>(),
@@ -69,7 +70,6 @@ Future<void> _initAuthModule() async {
     ),
   );
 
-  // Register LoginViewModel WITHOUT HomeViewModel to avoid circular dependency
   serviceLocator.registerFactory(
     () => LoginViewModel(serviceLocator<UserLoginUsecase>()),
   );

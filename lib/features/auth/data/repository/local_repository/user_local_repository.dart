@@ -7,10 +7,10 @@ import 'package:flutter_application_trek_e/features/auth/domain/entity/user_enti
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 
 class UserLocalRepository implements IUserRepository {
-  final UserLocalDatasource _userLocalDatasource;
+  final UserLocalDataSource _userLocalDatasource;
 
   UserLocalRepository({
-    required UserLocalDatasource userLocalDatasource,
+    required UserLocalDataSource userLocalDatasource,
   }) : _userLocalDatasource = userLocalDatasource;
 
   @override
@@ -25,7 +25,7 @@ class UserLocalRepository implements IUserRepository {
     String password,
   ) async {
     try {
-      final result = await _userLocalDatasource.loginStudent(
+      final result = await _userLocalDatasource.loginUser(
         username,
         password,
       );
@@ -36,9 +36,9 @@ class UserLocalRepository implements IUserRepository {
   }
 
   @override
-  Future<Either<Failure, void>> registerStudent(UserEntity student) async {
+  Future<Either<Failure, void>> registerUser(UserEntity student) async {
     try {
-      await _userLocalDatasource.registerStudent(student);
+      await _userLocalDatasource.registerUser(student);
       return Right(null);
     } catch (e) {
       return Left(LocalDatabaseFailure(message: "Failed to register: $e"));
