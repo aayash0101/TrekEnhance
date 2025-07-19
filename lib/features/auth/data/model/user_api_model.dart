@@ -8,21 +8,19 @@ part 'user_api_model.g.dart';
 class UserApiModel extends Equatable {
   @JsonKey(name: '_id')
   final String? userId;
-  final String fname;
-  final String lname;
-  final String? image;
-  final String phone;
   final String username;
+  final String email;
   final String? password;
+  final String? bio;
+  final String? location;
 
   const UserApiModel({
     this.userId,
-    required this.fname,
-    required this.lname,
-    required this.image,
-    required this.phone,
     required this.username,
-    required this.password,
+    required this.email,
+    this.password,
+    this.bio,
+    this.location,
   });
 
   factory UserApiModel.fromJson(Map<String, dynamic> json) =>
@@ -30,40 +28,28 @@ class UserApiModel extends Equatable {
 
   Map<String, dynamic> toJson() => _$UserApiModelToJson(this);
 
-  // To Entity
   UserEntity toEntity() {
     return UserEntity(
       userId: userId,
-      fName: fname,
-      lName: lname,
-      image: image,
-      phone: phone,
       username: username,
+      email: email,
       password: password ?? '',
+      bio: bio,
+      location: location,
     );
   }
 
-  // From Entity
   factory UserApiModel.fromEntity(UserEntity entity) {
-    final student = UserApiModel(
-      fname: entity.fName,
-      lname: entity.lName,
-      image: entity.image,
-      phone: entity.phone,
+    return UserApiModel(
+      userId: entity.userId,
       username: entity.username,
+      email: entity.email,
       password: entity.password,
+      bio: entity.bio,
+      location: entity.location,
     );
-    return student;
   }
 
   @override
-  List<Object?> get props => [
-    userId,
-    fname,
-    lname,
-    image,
-    phone,
-    username,
-    password,
-  ];
+  List<Object?> get props => [userId, username, email, password, bio, location];
 }

@@ -2,55 +2,53 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
 import 'package:flutter_application_trek_e/core/network/api_service.dart';
-import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/model/user_api_model.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
+import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 
-
-class StudentRemoteDataSource implements IUserDataSource {
+class UserRemoteDataSource implements IUserDataSource {
   final ApiService _apiService;
-  StudentRemoteDataSource({required ApiService apiService})
-    : _apiService = apiService;
+
+  UserRemoteDataSource({required ApiService apiService})
+      : _apiService = apiService;
 
   @override
-  Future<String> loginStudent(String username, String password) async {
+  Future<String> loginUser(String username, String password) async {
     try {
       final response = await _apiService.dio.post(
         ApiEndpoints.login,
         data: {'username': username, 'password': password},
       );
       if (response.statusCode == 200) {
-        final str = response.data['token'];
-        return str;
+        final token = response.data['token'];
+        return token;
       } else {
-        throw Exception(response.statusMessage);
+        throw Exception('Login failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception('Failed to login student: ${e.message}');
+      throw Exception('Failed to login: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to login student: $e');
+      throw Exception('Failed to login: $e');
     }
   }
 
   @override
-  Future<void> registerStudent(UserEntity studentData) async {
+  Future<void> registerUser(UserEntity userData) async {
     try {
-      final studentApiModel = UserApiModel.fromEntity(studentData);
+      final userApiModel = UserApiModel.fromEntity(userData);
       final response = await _apiService.dio.post(
         ApiEndpoints.register,
-        data: studentApiModel.toJson(),
+        data: userApiModel.toJson(),
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         return;
       } else {
-        throw Exception(
-          'Failed to register student: ${response.statusMessage}',
-        );
+        throw Exception('Registration failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception('Failed to register student: ${e.message}');
+      throw Exception('Failed to register: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to register student: $e');
+      throw Exception('Failed to register: $e');
     }
   }
 
@@ -71,21 +69,20 @@ class StudentRemoteDataSource implements IUserDataSource {
       );
 
       if (response.statusCode == 200) {
-        // Extract the image name from the response
-        final str = response.data['data'];
-        return str;
+        return response.data['data'];
       } else {
-        throw Exception(response.statusMessage);
+        throw Exception('Upload failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception('Failed to upload profile picture: ${e.message}');
+      throw Exception('Failed to upload picture: ${e.message}');
     } catch (e) {
-      throw Exception('Failed to upload profile picture: $e');
+      throw Exception('Failed to upload picture: $e');
     }
   }
 
   @override
   Future<UserEntity> getCurrentUser() {
+    // TODO: Implement if you have an endpoint like /me or /profile
     throw UnimplementedError();
   }
 }

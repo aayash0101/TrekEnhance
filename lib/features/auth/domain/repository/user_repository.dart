@@ -6,7 +6,7 @@ import 'package:flutter_application_trek_e/features/auth/domain/entity/user_enti
 
 
 abstract interface class IUserRepository {
-  Future<Either<Failure, void>> registerStudent(UserEntity student);
+  Future<Either<Failure, void>> registerUser(UserEntity student);
 
   Future<Either<Failure, String>> loginStudent(
     String username,

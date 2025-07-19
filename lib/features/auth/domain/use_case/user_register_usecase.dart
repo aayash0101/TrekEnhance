@@ -6,59 +6,34 @@ import 'package:flutter_application_trek_e/features/auth/domain/entity/user_enti
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 
 class RegisterUserParams extends Equatable {
-  final String fname;
-  final String lname;
-  final String phone;
   final String username;
+  final String email;
   final String password;
-  final String? image;
 
   const RegisterUserParams({
-    required this.fname,
-    required this.lname,
-    required this.phone,
     required this.username,
+    required this.email,
     required this.password,
-    this.image,
-  });
-
-  //intial constructor
-  const RegisterUserParams.initial({
-    required this.fname,
-    required this.lname,
-    required this.phone,
-    required this.username,
-    required this.password,
-    this.image,
   });
 
   @override
-  List<Object?> get props => [
-    fname,
-    lname,
-    phone,
-    username,
-    password,
-  ];
+  List<Object?> get props => [username, email, password];
 }
 
-class UserRegisterUsecase
-    implements UsecaseWithParams<void, RegisterUserParams> {
-  final IUserRepository _studentRepository;
+class UserRegisterUsecase implements UsecaseWithParams<void, RegisterUserParams> {
+  final IUserRepository _userRepository;
 
-  UserRegisterUsecase({required IUserRepository studentRepository})
-    : _studentRepository = studentRepository;
+  UserRegisterUsecase({required IUserRepository userRepository})
+      : _userRepository = userRepository;
 
   @override
   Future<Either<Failure, void>> call(RegisterUserParams params) {
-    final studentEntity = UserEntity(
-      fName: params.fname,
-      lName: params.lname,
-      phone: params.phone,
+    final userEntity = UserEntity(
       username: params.username,
+      email: params.email,
       password: params.password,
-      image: params.image,
     );
-    return _studentRepository.registerStudent(studentEntity);
+
+    return _userRepository.registerUser(userEntity);
   }
 }

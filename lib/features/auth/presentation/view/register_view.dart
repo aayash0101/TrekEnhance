@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view/login_view.dart';
 
-
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
@@ -59,7 +58,7 @@ class _SignupviewState extends State<RegisterView> {
           const Padding(
             padding: EdgeInsets.only(top: 60, left: 22),
             child: Text(
-              "Sign Up",
+              "Sign up",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 40,
@@ -161,7 +160,9 @@ class _SignupviewState extends State<RegisterView> {
                         ),
                       ),
                       const SizedBox(height: 70),
+                      // ✅ Added Key for testing
                       GestureDetector(
+                        key: const Key('signUpButton'),
                         onTap: _handleSignup,
                         child: Container(
                           height: 50,
@@ -216,7 +217,7 @@ class _SignupviewState extends State<RegisterView> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
                                   color: Colors.black,
-                                  decoration: TextDecoration.underline
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
                             ),

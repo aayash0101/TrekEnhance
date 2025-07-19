@@ -9,73 +9,57 @@ part 'user_hive_model.g.dart';
 @HiveType(typeId: HiveTableConstant.userTableId)
 class UserHiveModel extends Equatable {
   @HiveField(0)
-  final String? studentId;
+  final String? userId;
   @HiveField(1)
-  final String fName;
-  @HiveField(2)
-  final String lName;
-  @HiveField(3)
-  final String? image;
-  @HiveField(4)
-  final String phone;
-  @HiveField(7)
   final String username;
-  @HiveField(8)
+  @HiveField(2)
+  final String email;
+  @HiveField(3)
   final String password;
+  @HiveField(4)
+  final String? bio;
+  @HiveField(5)
+  final String? location;
 
   UserHiveModel({
-    String? studentId,
-    required this.fName,
-    required this.lName,
-    this.image,
-    required this.phone,
+    this.userId,
     required this.username,
+    required this.email,
     required this.password,
-  }) : studentId = studentId ?? const Uuid().v4();
+    this.bio,
+    this.location,
+  });
 
-  // Initial Constructor
   const UserHiveModel.initial()
-    : studentId = '',
-      fName = '',
-      lName = '',
-      image = '',
-      phone = '',
-      username = '',
-      password = '';
+      : userId = '',
+        username = '',
+        email = '',
+        password = '',
+        bio = '',
+        location = '';
 
-  // From Entity
   factory UserHiveModel.fromEntity(UserEntity entity) {
     return UserHiveModel(
-      studentId: entity.userId,
-      fName: entity.fName,
-      lName: entity.lName,
-      image: entity.image,
-      phone: entity.phone,
+      userId: entity.userId,
       username: entity.username,
+      email: entity.email,
       password: entity.password,
+      bio: entity.bio,
+      location: entity.location,
     );
   }
 
-  // To Entity
   UserEntity toEntity() {
     return UserEntity(
-      userId: studentId,
-      fName: fName,
-      lName: lName,
-      image: image,
-      phone: phone,
+      userId: userId,
       username: username,
+      email: email,
       password: password,
+      bio: bio,
+      location: location,
     );
   }
 
   @override
-  List<Object?> get props => [
-    studentId,
-    fName,
-    lName,
-    image,
-    username,
-    password,
-  ];
+  List<Object?> get props => [userId, username, email, password, bio, location];
 }

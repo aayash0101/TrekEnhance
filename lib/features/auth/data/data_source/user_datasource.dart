@@ -1,13 +1,16 @@
 import 'dart:io';
-
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
 
 abstract interface class IUserDataSource {
-  Future<void> registerStudent(UserEntity studentData);
+  /// Register a new user
+  Future<void> registerUser(UserEntity userData);
 
-  Future<String> loginStudent(String username, String password);
+  /// Login and get token
+  Future<String> loginUser(String username, String password);
 
+  /// Upload profile picture and get filename/url
   Future<String> uploadProfilePicture(File file);
 
+  /// Get current logged-in user data
   Future<UserEntity> getCurrentUser();
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view/register_view.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view/bottom_view/dashboard_view.dart';
 
-
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
@@ -149,7 +148,10 @@ class _FirstView extends State<LoginView> {
                         ),
                       ),
                       const SizedBox(height: 50),
+
+                      // ✅ Added Key to make it tappable in tests
                       GestureDetector(
+                        key: const Key('loginButton'),
                         onTap: _login,
                         child: Container(
                           height: 50,
@@ -171,7 +173,6 @@ class _FirstView extends State<LoginView> {
                                 fontSize: 30,
                                 color: Colors.white,
                               ),
-                            
                             ),
                           ),
                         ),
@@ -192,7 +193,7 @@ class _FirstView extends State<LoginView> {
                         alignment: Alignment.bottomRight,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          children:  [
+                          children: [
                             const Text(
                               "Don't have an account?",
                               style: TextStyle(
@@ -202,11 +203,12 @@ class _FirstView extends State<LoginView> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: (){
+                              onTap: () {
                                 Navigator.push(
-                                  context, 
+                                  context,
                                   MaterialPageRoute(
-                                    builder: (context) =>  RegisterView()));
+                                      builder: (context) => RegisterView()),
+                                );
                               },
                               child: const Text(
                                 "Sign Up",
@@ -214,9 +216,8 @@ class _FirstView extends State<LoginView> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20,
                                   color: Colors.black,
-                                  decoration: TextDecoration.underline
+                                  decoration: TextDecoration.underline,
                                 ),
-                                
                               ),
                             ),
                           ],
