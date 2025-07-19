@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view/login_view.dart';
+import 'package:flutter_application_trek_e/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 
 class Splashscereen extends StatefulWidget {
   const Splashscereen({super.key});
@@ -16,18 +19,25 @@ class _SplashscereenState extends State<Splashscereen>
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     Future.delayed(const Duration(seconds: 5), () {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const LoginView()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => serviceLocator<LoginViewModel>(),
+            child: const LoginView(),
+          ),
+        ),
+      );
     });
   }
 
+  // If you want, you can restore system UI later:
   // @override
   // void dispose() {
   //   SystemChrome.setEnabledSystemUIMode(
   //     SystemUiMode.manual,
   //     overlays: SystemUiOverlay.values,
   //   );
+  //   super.dispose();
   // }
 
   @override
@@ -36,7 +46,7 @@ class _SplashscereenState extends State<Splashscereen>
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.blue, Colors.pink],
             begin: Alignment.topRight,

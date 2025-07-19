@@ -11,9 +11,9 @@ import 'package:flutter_application_trek_e/features/home/presentation/view_model
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class LoginViewModel extends Bloc<LoginEvent, LoginState> {
-  final UserLoginUsecase _studentLoginUsecase;
+  final UserLoginUsecase _userLoginUsecase;
 
-  LoginViewModel(this._studentLoginUsecase) : super(LoginState.initial()) {
+  LoginViewModel(this._userLoginUsecase) : super(LoginState.initial()) {
     on<NavigateToRegisterViewEvent>(_onNavigateToRegisterView);
     on<NavigateToHomeViewEvent>(_onNavigateToHomeView);
     on<LoginWithEmailAndPasswordEvent>(_onLoginWithEmailAndPassword);
@@ -61,7 +61,7 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
     Emitter<LoginState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
-    final result = await _studentLoginUsecase(
+    final result = await _userLoginUsecase(
       LoginParams(username: event.username, password: event.password),
     );
 

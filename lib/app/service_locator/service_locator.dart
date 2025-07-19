@@ -1,4 +1,4 @@
-import 'package:flutter_application_trek_e/core/network/hive_service.dart';
+import 'package:flutter_application_trek_e/app/constant/hive_table_constant.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/local_datasource/user_local_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/repository/local_repository/user_local_repository.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
@@ -9,6 +9,7 @@ import 'package:flutter_application_trek_e/features/auth/presentation/view_model
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/register_view_model/register_view_model.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
+import 'package:flutter_application_trek_e/core/network/hive_service.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt serviceLocator = GetIt.instance;
@@ -21,7 +22,9 @@ Future<void> initDependencies() async {
 }
 
 Future<void> _initHiveService() async {
-  serviceLocator.registerLazySingleton(() => HiveService());
+  final hiveService = HiveService();
+  await hiveService.init();  // Initialize before registering
+  serviceLocator.registerSingleton<HiveService>(hiveService);
 }
 
 Future<void> _initAuthModule() async {

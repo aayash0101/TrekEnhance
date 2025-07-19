@@ -13,6 +13,7 @@ class UserLocalDataSource implements IUserDataSource {
 
   @override
   Future<void> registerUser(UserEntity user) async {
+    // Convert entity to Hive model and register with HiveService.
     final userHiveModel = UserHiveModel.fromEntity(user);
     await _hiveService.register(userHiveModel);
   }
@@ -39,7 +40,7 @@ class UserLocalDataSource implements IUserDataSource {
 
   @override
   Future<String> uploadProfilePicture(File file) {
-    // Not implemented for local data source
+    // This method is not implemented locally, throws error.
     throw UnimplementedError();
   }
 }
