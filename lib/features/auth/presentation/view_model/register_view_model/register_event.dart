@@ -14,18 +14,14 @@ class UploadImageEvent extends RegisterEvent {
 
 class RegisterUserEvent extends RegisterEvent {
   final BuildContext context;
-  final String firstName;
-  final String lastName;
-  final String phone;
+  final String email;
   final String username;
   final String password;
   final String? image;
 
   RegisterUserEvent({
     required this.context,
-    required this.firstName,
-    required this.lastName,
-    required this.phone,
+    required this.email,
     required this.username,
     required this.password,
     this.image,
