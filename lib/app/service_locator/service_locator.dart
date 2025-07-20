@@ -1,6 +1,11 @@
-import 'package:flutter_application_trek_e/app/constant/hive_table_constant.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
+import 'package:flutter_application_trek_e/core/network/hive_service.dart';
+import 'package:flutter_application_trek_e/core/network/api_service.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/local_datasource/user_local_datasource.dart';
+import 'package:flutter_application_trek_e/features/auth/data/data_source/remote_datasource/user_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/repository/local_repository/user_local_repository.dart';
+import 'package:flutter_application_trek_e/features/auth/data/repository/remote_repository/user_remote_repository.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_image_upload_usecase.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_login_usecase.dart';
@@ -9,63 +14,91 @@ import 'package:flutter_application_trek_e/features/auth/presentation/view_model
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/register_view_model/register_view_model.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
-import 'package:flutter_application_trek_e/core/network/hive_service.dart';
 import 'package:get_it/get_it.dart';
 
 final GetIt serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   await _initHiveService();
-  await _initAuthModule();
-  await _initHomeModule();
-  await _initSplashModule();
+  _initApiModule();
+  _initAuthModule();
+  _initHomeModule();
+  _initSplashModule();
 }
 
 Future<void> _initHiveService() async {
   final hiveService = HiveService();
-  await hiveService.init();  // Initialize before registering
+  await hiveService.init();
   serviceLocator.registerSingleton<HiveService>(hiveService);
 }
 
-Future<void> _initAuthModule() async {
-  // 📡 Local data source
-  serviceLocator.registerFactory(
+void _initApiModule() {
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: ApiEndpoints.baseUrl,
+      connectTimeout: ApiEndpoints.connectionTimeout,
+      receiveTimeout: ApiEndpoints.receiveTimeout,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ),
+  );
+
+  serviceLocator.registerSingleton<ApiService>(ApiService(dio));
+}
+
+void _initAuthModule() {
+  // Local DataSource (optional, if you want to keep local caching)
+  serviceLocator.registerFactory<UserLocalDataSource>(
     () => UserLocalDataSource(hiveService: serviceLocator<HiveService>()),
   );
 
-  // 🧩 Local repository (implements IUserRepository)
-  serviceLocator.registerFactory(
+  // Remote DataSource (for backend API calls)
+  serviceLocator.registerFactory<UserRemoteDataSource>(
+    () => UserRemoteDataSource(apiService: serviceLocator<ApiService>()),
+  );
+
+  // Use remote repository for real backend interaction:
+  serviceLocator.registerFactory<UserRemoteRepository>(
+    () => UserRemoteRepository(
+      remoteDataSource: serviceLocator<UserRemoteDataSource>(),
+    ),
+  );
+
+  // If you still want local repo for some reason, keep it here:
+  serviceLocator.registerFactory<UserLocalRepository>(
     () => UserLocalRepository(
       userLocalDatasource: serviceLocator<UserLocalDataSource>(),
     ),
   );
 
-  // 📦 Use cases
-  serviceLocator.registerFactory(
+  // Use Cases — IMPORTANT: Use remote repo here to hit backend
+  serviceLocator.registerFactory<UserLoginUsecase>(
     () => UserLoginUsecase(
-      userRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserRemoteRepository>(),
     ),
   );
 
-  serviceLocator.registerFactory(
+  serviceLocator.registerFactory<UserRegisterUsecase>(
     () => UserRegisterUsecase(
-      userRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserRemoteRepository>(),
     ),
   );
 
-  serviceLocator.registerFactory(
+  serviceLocator.registerFactory<UploadImageUsecase>(
     () => UploadImageUsecase(
-      userRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserRemoteRepository>(),
     ),
   );
 
-  serviceLocator.registerFactory(
+  serviceLocator.registerFactory<UserGetCurrentUsecase>(
     () => UserGetCurrentUsecase(
-      userRepository: serviceLocator<UserLocalRepository>(),
+      userRepository: serviceLocator<UserRemoteRepository>(),
     ),
   );
 
-  // 🧠 ViewModels
+  // ViewModels
   serviceLocator.registerFactory(
     () => RegisterViewModel(
       serviceLocator<UserRegisterUsecase>(),
@@ -78,12 +111,12 @@ Future<void> _initAuthModule() async {
   );
 }
 
-Future<void> _initHomeModule() async {
+void _initHomeModule() {
   serviceLocator.registerFactory(
     () => HomeViewModel(loginViewModel: serviceLocator<LoginViewModel>()),
   );
 }
 
-Future<void> _initSplashModule() async {
+void _initSplashModule() {
   serviceLocator.registerFactory(() => SplashViewModel());
 }
