@@ -16,7 +16,7 @@ class UserRemoteRepository implements IUserRepository {
       await remoteDataSource.registerUser(user);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(message: "Failed to register: $e"));
+      return Left(RemoteDatabaseFailure(message: "Failed to register: $e"));
     }
   }
 
@@ -26,7 +26,7 @@ class UserRemoteRepository implements IUserRepository {
       final token = await remoteDataSource.loginUser(username, password);
       return Right(token);
     } catch (e) {
-      return Left(ServerFailure(message: "Failed to login: $e"));
+      return Left(RemoteDatabaseFailure(message: "Failed to login: $e"));
     }
   }
 
@@ -36,13 +36,12 @@ class UserRemoteRepository implements IUserRepository {
       final imageName = await remoteDataSource.uploadProfilePicture(file);
       return Right(imageName);
     } catch (e) {
-      return Left(ServerFailure(message: "Failed to upload picture: $e"));
+      return Left(RemoteDatabaseFailure(message: "Failed to upload picture: $e"));
     }
   }
 
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() {
-    // TODO: implement if you have API
     throw UnimplementedError();
   }
 }
