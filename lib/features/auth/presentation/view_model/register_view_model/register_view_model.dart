@@ -18,6 +18,7 @@ class RegisterViewModel extends Bloc<RegisterEvent, RegisterState> {
     on<UploadImageEvent>(_onUploadImage);
   }
 
+  /// Handles user registration
   Future<void> _onRegisterUser(
     RegisterUserEvent event,
     Emitter<RegisterState> emit,
@@ -45,12 +46,13 @@ class RegisterViewModel extends Bloc<RegisterEvent, RegisterState> {
         emit(state.copyWith(isLoading: false, isSuccess: true));
         showMySnackBar(
           context: event.context,
-          message: "Registration Successful",
+          message: "Registration Successful",  // Clear success message
         );
       },
     );
   }
 
+  /// Handles uploading user image
   Future<void> _onUploadImage(
     UploadImageEvent event,
     Emitter<RegisterState> emit,
@@ -62,7 +64,10 @@ class RegisterViewModel extends Bloc<RegisterEvent, RegisterState> {
     );
 
     result.fold(
-      (_) => emit(state.copyWith(isLoading: false, isSuccess: false)),
+      (failure) {
+        emit(state.copyWith(isLoading: false, isSuccess: false));
+        // Optionally show failure snackbar for image upload here if needed
+      },
       (imageName) {
         emit(state.copyWith(isLoading: false, isSuccess: true, imageName: imageName));
       },

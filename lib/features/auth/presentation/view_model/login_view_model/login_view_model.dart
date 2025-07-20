@@ -19,6 +19,7 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
     on<LoginWithEmailAndPasswordEvent>(_onLoginWithEmailAndPassword);
   }
 
+  /// Navigate to Register screen
   void _onNavigateToRegisterView(
     NavigateToRegisterViewEvent event,
     Emitter<LoginState> emit,
@@ -26,19 +27,17 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
     if (event.context.mounted) {
       Navigator.push(
         event.context,
-
         MaterialPageRoute(
-          builder: (context) => MultiBlocProvider(
-            providers: [
-              BlocProvider.value(value: serviceLocator<RegisterViewModel>()),
-            ],
-            child: RegisterView(),
+          builder: (_) => BlocProvider(
+            create: (_) => serviceLocator<RegisterViewModel>(),
+            child: const RegisterView(),
           ),
         ),
       );
     }
   }
 
+  /// Navigate to Home screen
   void _onNavigateToHomeView(
     NavigateToHomeViewEvent event,
     Emitter<LoginState> emit,
@@ -47,8 +46,8 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
       Navigator.pushReplacement(
         event.context,
         MaterialPageRoute(
-          builder: (context) => BlocProvider.value(
-            value: serviceLocator<HomeViewModel>(),
+          builder: (_) => BlocProvider(
+            create: (_) => serviceLocator<HomeViewModel>(),
             child: const HomeView(),
           ),
         ),
@@ -56,20 +55,20 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  void _onLoginWithEmailAndPassword(
+  /// Handle login with username & password
+  Future<void> _onLoginWithEmailAndPassword(
     LoginWithEmailAndPasswordEvent event,
     Emitter<LoginState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
+
     final result = await _userLoginUsecase(
       LoginParams(username: event.username, password: event.password),
     );
 
     result.fold(
       (failure) {
-        // Handle failure case
         emit(state.copyWith(isLoading: false, isSuccess: false));
-
         showMySnackBar(
           context: event.context,
           message: 'Invalid credentials. Please try again.',
@@ -77,7 +76,6 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
         );
       },
       (token) {
-        // Handle success case
         emit(state.copyWith(isLoading: false, isSuccess: true));
         add(NavigateToHomeViewEvent(context: event.context));
       },

@@ -9,13 +9,15 @@ class HiveService {
   final _uuid = Uuid();
 
   Future<void> init() async {
-    final directory = await getApplicationDocumentsDirectory();
-    Hive.init(directory.path);
+  final directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
 
+  if (!Hive.isAdapterRegistered(0)) {
     Hive.registerAdapter(UserHiveModelAdapter());
-
-    _userBox = await Hive.openBox<UserHiveModel>(HiveTableConstant.userBox);
   }
+
+  _userBox = await Hive.openBox<UserHiveModel>(HiveTableConstant.userBox);
+}
 
   // Register user - generates key if userId is null
   Future<void> register(UserHiveModel user) async {

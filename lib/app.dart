@@ -11,7 +11,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Student Management',
+      title: 'trekEnhance',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.getApplicationTheme(isDarkMode: false),
       home: BlocProvider.value(
