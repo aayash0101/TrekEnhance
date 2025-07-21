@@ -5,19 +5,41 @@ class ApiEndpoints {
   static const connectionTimeout = Duration(seconds: 1000);
   static const receiveTimeout = Duration(seconds: 1000);
 
-  // For Android Emulator use 10.0.2.2
+  // Server base (Android Emulator: 10.0.2.2)
   static const String serverAddress = "http://10.0.2.2:5000";
 
-  // Base URL matches your backend
-  static const String baseUrl = "$serverAddress/api/users/";
+  // Base URLs
+  static const String userBaseUrl = "$serverAddress/api/users/";
+  static const String trekBaseUrl = "$serverAddress/api/treks/";
+  static const String journalBaseUrl = "$serverAddress/api/journals/";
 
-  // Auth
+  // Auth / Users
   static const String register = "signup";
   static const String login = "login";
-  static const String getAllUsers = "getAllUsers"; // if you have it
-  static const String deleteUsers = "deleteUsers/"; // if you have it
-  static const String uploadImage = "uploadImage";  // if you have it
+  static const String getAllUsers = "getAllUsers";
+  static const String deleteUserById = "deleteUsers/"; // append {id}
+  static const String uploadImage = "uploadImage";
 
-  // Example usage in your code:
-  // final url = ApiEndpoints.baseUrl + ApiEndpoints.register;
+  // Treks
+  static const String getAllTreks = ""; // GET trekBaseUrl
+  static String getTrekById(String id) => "$id"; // trekBaseUrl + {id}
+  static const String createTrek = ""; // POST trekBaseUrl
+  static String updateTrekById(String id) => "$id"; // PUT trekBaseUrl + {id}
+  static String deleteTrekById(String id) => "$id"; // DELETE trekBaseUrl + {id}
+  static const String uploadTrekImage = "upload"; // trekBaseUrl + upload
+
+  // Reviews
+  static String addReview(String trekId) => "$trekId/reviews"; // POST
+  static String getReviews(String trekId) => "$trekId/reviews"; // GET
+  static const String getAllReviewsFromAllTreks = "reviews/all"; // GET trekBaseUrl + reviews/all
+
+  // Journals
+  static const String getAllJournals = ""; // GET journalBaseUrl
+  static String getJournalById(String id) => "$id"; // journalBaseUrl + {id}
+  static const String createJournal = ""; // POST journalBaseUrl
+  static String updateJournalById(String id) => "$id"; // PUT journalBaseUrl + {id}
+  static String deleteJournalById(String id) => "$id"; // DELETE journalBaseUrl + {id}
+
+  // Example usage:
+  // final url = ApiEndpoints.trekBaseUrl + ApiEndpoints.getTrekById("123");
 }

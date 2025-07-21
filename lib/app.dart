@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 import 'package:flutter_application_trek_e/app/theme/app_theme.dart';
+import 'package:flutter_application_trek_e/features/home/presentation/view/home_view.dart';
 import 'package:flutter_application_trek_e/features/splash/presentation/view/splashscreen_view.dart';
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
@@ -25,7 +26,7 @@ class App extends StatelessWidget {
         title: 'trekEnhance',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.getApplicationTheme(isDarkMode: false),
-        home: const Splashscereen(),
+        home: const HomeView(),
       ),
     );
   }
