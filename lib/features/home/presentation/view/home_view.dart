@@ -12,14 +12,12 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeViewModel(
-        serviceLocator<IHomeRepository>(), // use interface
-      )..add(LoadTreks()), // trigger load on start
+      create:
+          (_) => HomeViewModel(
+            serviceLocator<IHomeRepository>(), // use interface
+          )..add(LoadTreks()), // trigger load on start
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Treks'),
-          centerTitle: true,
-        ),
+        appBar: AppBar(title: const Text('Treks'), centerTitle: true),
         body: BlocBuilder<HomeViewModel, HomeState>(
           builder: (context, state) {
             if (state is HomeLoading) {
@@ -30,23 +28,31 @@ class HomeView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final trek = state.treks[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(8),
-                      leading: trek.imageUrl.isNotEmpty
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                'http://localhost:5000${trek.imageUrl}',
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
+                      leading:
+                          (trek.imageUrl ?? '').isNotEmpty
+                              ? ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.network(
+                                  'http://localhost:5000${trek.imageUrl}',
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                              : const Icon(
+                                Icons.landscape,
+                                size: 40,
+                                color: Colors.grey,
                               ),
-                            )
-                          : const Icon(Icons.landscape, size: 40, color: Colors.grey),
                       title: Text(
                         trek.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
