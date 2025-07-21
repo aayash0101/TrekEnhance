@@ -1,29 +1,21 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_application_trek_e/features/home/presentation/view/bottom_view/dashboard_view.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter_application_trek_e/features/home/data/model/home_model.dart';
 
 
-class HomeState {
-  final int selectedIndex;
-  final List<Widget> views;
+abstract class HomeState {}
 
-  const HomeState({required this.selectedIndex, required this.views});
+class HomeInitial extends HomeState {}
 
-  // Initial state
-  static HomeState initial() {
-    return HomeState(
-      selectedIndex: 0,
-      views: [
-        Dashboard(),
-       
-      ],
-    );
-  }
+class HomeLoading extends HomeState {}
 
-  HomeState copyWith({int? selectedIndex, List<Widget>? views}) {
-    return HomeState(
-      selectedIndex: selectedIndex ?? this.selectedIndex,
-      views: views ?? this.views,
-    );
-  }
+class HomeLoaded extends HomeState {
+  final List<HomeModel> items;
+
+  HomeLoaded(this.items);
+}
+
+class HomeError extends HomeState {
+  final String message;
+
+  HomeError(this.message);
 }

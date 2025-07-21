@@ -1,74 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_trek_e/core/common/snackbar/my_snackbar.dart';
-import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_state.dart';
-import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../view_model/home_view_model.dart';
+import '../view_model/home_event.dart';
+import '../view_model/home_state.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
-  final bool _isDarkTheme = false;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              // Logout code
-              showMySnackBar(
-                context: context,
-                message: 'Logging out...',
-                color: Colors.red,
+    return BlocProvider(
+      create: (_) => HomeViewModel()..add(LoadHomeData()),
+      child: Scaffold(
+        appBar: AppBar(title: Text('TrekEnhance')),
+        body: BlocBuilder<HomeViewModel, HomeState>(
+          builder: (context, state) {
+            if (state is HomeLoading) {
+              return Center(child: CircularProgressIndicator());
+            } else if (state is HomeLoaded) {
+              return ListView.builder(
+                itemCount: state.items.length,
+                itemBuilder: (context, index) {
+                  final item = state.items[index];
+                  return Card(
+                    margin: EdgeInsets.all(8),
+                    child: ListTile(
+                      leading: Image.asset(item.imageUrl, width: 60, fit: BoxFit.cover),
+                      title: Text(item.title),
+                      subtitle: Text(item.description),
+                    ),
+                  );
+                },
               );
-
-              context.read<HomeViewModel>().logout(context);
-            },
-          ),
-          Switch(
-            value: _isDarkTheme,
-            onChanged: (value) {
-              // Change theme
-              // setState(() {
-              //   _isDarkTheme = value;
-              // });
-            },
-          ),
-        ],
-      ),
-      // body: _views.elementAt(_selectedIndex),
-      body: BlocBuilder<HomeViewModel, HomeState>(
-        builder: (context, state) {
-          return state.views.elementAt(state.selectedIndex);
-        },
-      ),
-      bottomNavigationBar: BlocBuilder<HomeViewModel, HomeState>(
-        builder: (context, state) {
-          return BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.dashboard),
-                label: 'Dashboard',
-              ),
-              BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Course'),
-              BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Batch'),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.account_circle),
-                label: 'Account',
-              ),
-            ],
-            currentIndex: state.selectedIndex,
-            selectedItemColor: Colors.white,
-            onTap: (index) {
-              context.read<HomeViewModel>().onTabTapped(index);
-            },
-          );
-        },
+            } else if (state is HomeError) {
+              return Center(child: Text(state.message));
+            } else {
+              return Center(child: Text('Welcome to TrekEnhance'));
+            }
+          },
+        ),
       ),
     );
   }

@@ -27,13 +27,13 @@ class UserRegisterUsecase implements UsecaseWithParams<void, RegisterUserParams>
       : _userRepository = userRepository;
 
   @override
-  Future<Either<Failure, void>> call(RegisterUserParams params) {
+  Future<Either<Failure, void>> call(RegisterUserParams params) async {
     final userEntity = UserEntity(
       username: params.username,
       email: params.email,
       password: params.password,
     );
 
-    return _userRepository.registerUser(userEntity);
+    return await _userRepository.registerUser(userEntity);
   }
 }

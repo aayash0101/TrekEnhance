@@ -112,9 +112,7 @@ void _initAuthModule() {
 }
 
 void _initHomeModule() {
-  serviceLocator.registerFactory(
-    () => HomeViewModel(loginViewModel: serviceLocator<LoginViewModel>()),
-  );
+  serviceLocator.registerFactory(() => HomeViewModel());
 }
 
 void _initSplashModule() {
