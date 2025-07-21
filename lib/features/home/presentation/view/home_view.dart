@@ -9,13 +9,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
+  // Fix image URL for emulator/device
+  String fixImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('http')) return url;
+    // Use Android emulator localhost alias:
+    return 'http://10.0.2.2:5000$url';
+    // For physical device or iOS simulator, replace with your machine IP address instead of 10.0.2.2
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create:
-          (_) => HomeViewModel(
-            serviceLocator<IHomeRepository>(), // use interface
-          )..add(LoadTreks()), // trigger load on start
+      create: (_) => HomeViewModel(
+        serviceLocator<IHomeRepository>(),
+      )..add(LoadTreks()),
       child: Scaffold(
         appBar: AppBar(title: const Text('Treks'), centerTitle: true),
         body: BlocBuilder<HomeViewModel, HomeState>(
@@ -37,22 +45,23 @@ class HomeView extends StatelessWidget {
                     ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(8),
-                      leading:
-                          (trek.imageUrl ?? '').isNotEmpty
-                              ? ClipRRect(
+                      leading: (trek.imageUrl ?? '').isNotEmpty
+                          ? SizedBox(
+                              width: 60,
+                              height: 60,
+                              child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: Image.network(
-                                  'http://localhost:5000${trek.imageUrl}',
-                                  width: 60,
-                                  height: 60,
+                                  fixImageUrl(trek.imageUrl),
                                   fit: BoxFit.cover,
                                 ),
-                              )
-                              : const Icon(
-                                Icons.landscape,
-                                size: 40,
-                                color: Colors.grey,
                               ),
+                            )
+                          : const Icon(
+                              Icons.landscape,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
                       title: Text(
                         trek.name,
                         style: const TextStyle(fontWeight: FontWeight.bold),
