@@ -8,9 +8,16 @@ abstract interface class IUserDataSource {
   /// Login and get token
   Future<String> loginUser(String username, String password);
 
-  /// Upload profile picture and get filename/url
+  /// Upload profile picture and get filename or URL
   Future<String> uploadProfilePicture(File file);
 
   /// Get current logged-in user data
   Future<UserEntity> getCurrentUser();
+
+  /// Update user profile and get updated user
+  Future<UserEntity> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  });
 }

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/model/user_hive_model.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
@@ -13,7 +12,6 @@ class UserLocalDataSource implements IUserDataSource {
 
   @override
   Future<void> registerUser(UserEntity user) async {
-    // Convert entity to Hive model and register with HiveService.
     final userHiveModel = UserHiveModel.fromEntity(user);
     await _hiveService.register(userHiveModel);
   }
@@ -40,7 +38,21 @@ class UserLocalDataSource implements IUserDataSource {
 
   @override
   Future<String> uploadProfilePicture(File file) {
-    // This method is not implemented locally, throws error.
+    // Not supported locally
     throw UnimplementedError();
+  }
+
+  @override
+  Future<UserEntity> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  }) async {
+    final updated = await _hiveService.updateUserProfile(
+      username: username,
+      bio: bio,
+      location: location,
+    );
+    return updated?.toEntity() ?? (throw Exception("Failed to update user: user not found"));
   }
 }

@@ -20,15 +20,12 @@ class UserRemoteDataSource implements IUserDataSource {
         data: {'username': username, 'password': password},
       );
       if (response.statusCode == 200) {
-        final token = response.data['token'];
-        return token;
+        return response.data['token'];
       } else {
         throw Exception('Login failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
       throw Exception('Failed to login: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to login: $e');
     }
   }
 
@@ -40,15 +37,11 @@ class UserRemoteDataSource implements IUserDataSource {
         ApiEndpoints.register,
         data: userApiModel.toJson(),
       );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return;
-      } else {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Registration failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
       throw Exception('Failed to register: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to register: $e');
     }
   }
 
@@ -57,17 +50,12 @@ class UserRemoteDataSource implements IUserDataSource {
     try {
       String fileName = file.path.split('/').last;
       FormData formData = FormData.fromMap({
-        'profilePicture': await MultipartFile.fromFile(
-          file.path,
-          filename: fileName,
-        ),
+        'profilePicture': await MultipartFile.fromFile(file.path, filename: fileName),
       });
-
-      Response response = await _apiService.dio.post(
+      final response = await _apiService.dio.post(
         ApiEndpoints.uploadImage,
         data: formData,
       );
-
       if (response.statusCode == 200) {
         return response.data['data'];
       } else {
@@ -75,14 +63,45 @@ class UserRemoteDataSource implements IUserDataSource {
       }
     } on DioException catch (e) {
       throw Exception('Failed to upload picture: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to upload picture: $e');
     }
   }
 
   @override
-  Future<UserEntity> getCurrentUser() {
-    // TODO: Implement if you have an endpoint like /me or /profile
-    throw UnimplementedError();
+  Future<UserEntity> getCurrentUser() async {
+    try {
+      final response = await _apiService.dio.get(ApiEndpoints.userBaseUrl + ApiEndpoints.getProfile);
+      if (response.statusCode == 200) {
+        return UserApiModel.fromJson(response.data['data']).toEntity();
+      } else {
+        throw Exception('Failed to fetch user: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to get user: ${e.message}');
+    }
+  }
+
+  @override
+  Future<UserEntity> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  }) async {
+    try {
+      final response = await _apiService.dio.put(
+        ApiEndpoints.updateProfile, // e.g., /profile/update
+        data: {
+          'username': username,
+          if (bio != null) 'bio': bio,
+          if (location != null) 'location': location,
+        },
+      );
+      if (response.statusCode == 200) {
+        return UserApiModel.fromJson(response.data['data']).toEntity();
+      } else {
+        throw Exception('Failed to update profile: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to update profile: ${e.message}');
+    }
   }
 }

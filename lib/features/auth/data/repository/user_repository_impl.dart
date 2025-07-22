@@ -18,8 +18,7 @@ class UserRepositoryImpl implements IUserRepository {
   Future<Either<Failure, void>> registerUser(UserEntity user) async {
     try {
       await remoteDataSource.registerUser(user);
-      // Optionally cache locally for offline use
-      await localDataSource.registerUser(user);
+      await localDataSource.registerUser(user); // optionally cache
       return const Right(null);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
@@ -30,7 +29,6 @@ class UserRepositoryImpl implements IUserRepository {
   Future<Either<Failure, String>> loginUser(String username, String password) async {
     try {
       final token = await remoteDataSource.loginUser(username, password);
-      // Optionally you could cache user data locally here too
       return Right(token);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
@@ -40,8 +38,8 @@ class UserRepositoryImpl implements IUserRepository {
   @override
   Future<Either<Failure, String>> uploadProfilePicture(File file) async {
     try {
-      final imageUrlOrName = await remoteDataSource.uploadProfilePicture(file);
-      return Right(imageUrlOrName);
+      final url = await remoteDataSource.uploadProfilePicture(file);
+      return Right(url);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
     }
@@ -50,17 +48,34 @@ class UserRepositoryImpl implements IUserRepository {
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      // Try from local cache first
       final user = await localDataSource.getCurrentUser();
       return Right(user);
     } catch (_) {
       try {
-        // Fallback to remote API
         final user = await remoteDataSource.getCurrentUser();
         return Right(user);
       } catch (e) {
         return Left(RemoteDatabaseFailure(message: e.toString()));
       }
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  }) async {
+    try {
+      final updatedUser = await remoteDataSource.updateUserProfile(
+        username: username,
+        bio: bio,
+        location: location,
+      );
+      await localDataSource.registerUser(updatedUser); // update cache
+      return Right(updatedUser);
+    } catch (e) {
+      return Left(RemoteDatabaseFailure(message: e.toString()));
     }
   }
 }

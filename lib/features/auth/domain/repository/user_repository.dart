@@ -13,9 +13,17 @@ abstract interface class IUserRepository {
     String password,
   );
 
+
   /// Upload user's profile picture, returns uploaded filename or URL
   Future<Either<Failure, String>> uploadProfilePicture(File file);
 
   /// Get currently logged-in user info (try local first, then remote)
   Future<Either<Failure, UserEntity>> getCurrentUser();
+  
+   Future<Either<Failure, UserEntity>> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  });
+  
 }

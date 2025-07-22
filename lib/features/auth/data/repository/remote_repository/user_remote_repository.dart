@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_application_trek_e/core/error/failure.dart';
+import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
-import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 
 class UserRemoteRepository implements IUserRepository {
   final IUserDataSource remoteDataSource;
@@ -41,7 +41,30 @@ class UserRemoteRepository implements IUserRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> getCurrentUser() {
-    throw UnimplementedError();
+  Future<Either<Failure, UserEntity>> getCurrentUser() async {
+    try {
+      final user = await remoteDataSource.getCurrentUser();
+      return Right(user);
+    } catch (e) {
+      return Left(RemoteDatabaseFailure(message: "Failed to get user: $e"));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  }) async {
+    try {
+      final updatedUser = await remoteDataSource.updateUserProfile(
+        username: username,
+        bio: bio,
+        location: location,
+      );
+      return Right(updatedUser);
+    } catch (e) {
+      return Left(RemoteDatabaseFailure(message: "Failed to update profile: $e"));
+    }
   }
 }

@@ -14,32 +14,35 @@ class ApiEndpoints {
   static const String journalBaseUrl = "$serverAddress/api/journals/";
 
   // Auth / Users
-  static const String register = "signup";
+  static const String register = "signup";                      // POST userBaseUrl + signup
   static const String login = "login";
-  static const String getAllUsers = "getAllUsers";
-  static const String deleteUserById = "deleteUsers/"; // append {id}
-  static const String uploadImage = "uploadImage";
+  static const String getProfile = "profile";                           // POST userBaseUrl + login
+  static const String getAllUsers = "getAllUsers";              // GET userBaseUrl + getAllUsers
+  static const String deleteUserById = "deleteUsers/";          // DELETE userBaseUrl + {id}
+  static const String uploadImage = "uploadImage";              // POST userBaseUrl + uploadImage
+  static const String updateProfile = "updateProfile";          // PUT userBaseUrl + updateProfile
 
   // Treks
-  static const String getAllTreks = ""; // GET trekBaseUrl
-  static String getTrekById(String id) => "$id"; // trekBaseUrl + {id}
-  static const String createTrek = ""; // POST trekBaseUrl
-  static String updateTrekById(String id) => "$id"; // PUT trekBaseUrl + {id}
-  static String deleteTrekById(String id) => "$id"; // DELETE trekBaseUrl + {id}
-  static const String uploadTrekImage = "upload"; // trekBaseUrl + upload
+  static const String getAllTreks = "";                         // GET trekBaseUrl
+  static String getTrekById(String id) => "$id";                // trekBaseUrl + {id}
+  static const String createTrek = "";                          // POST trekBaseUrl
+  static String updateTrekById(String id) => "$id";             // PUT trekBaseUrl + {id}
+  static String deleteTrekById(String id) => "$id";             // DELETE trekBaseUrl + {id}
+  static const String uploadTrekImage = "upload";               // POST trekBaseUrl + upload
 
   // Reviews
-  static String addReview(String trekId) => "$trekId/reviews"; // POST
-  static String getReviews(String trekId) => "$trekId/reviews"; // GET
-  static const String getAllReviewsFromAllTreks = "reviews/all"; // GET trekBaseUrl + reviews/all
+  static String addReview(String trekId) => "$trekId/reviews";  // POST trekBaseUrl + {trekId}/reviews
+  static String getReviews(String trekId) => "$trekId/reviews"; // GET trekBaseUrl + {trekId}/reviews
+  static const String getAllReviewsFromAllTreks = "reviews/all";// GET trekBaseUrl + reviews/all
 
   // Journals
-  static const String getAllJournals = ""; // GET journalBaseUrl
-  static String getJournalById(String id) => "$id"; // journalBaseUrl + {id}
-  static const String createJournal = ""; // POST journalBaseUrl
-  static String updateJournalById(String id) => "$id"; // PUT journalBaseUrl + {id}
-  static String deleteJournalById(String id) => "$id"; // DELETE journalBaseUrl + {id}
+  static const String getAllJournals = "";                      // GET journalBaseUrl
+  static String getJournalById(String id) => "$id";             // journalBaseUrl + {id}
+  static const String createJournal = "";                        // POST journalBaseUrl
+  static String updateJournalById(String id) => "$id";          // PUT journalBaseUrl + {id}
+  static String deleteJournalById(String id) => "$id";          // DELETE journalBaseUrl + {id}
 
   // Example usage:
+  // final url = ApiEndpoints.userBaseUrl + ApiEndpoints.register;
   // final url = ApiEndpoints.trekBaseUrl + ApiEndpoints.getTrekById("123");
 }

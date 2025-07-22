@@ -19,7 +19,7 @@ class HiveService {
     _userBox = await Hive.openBox<UserHiveModel>(HiveTableConstant.userBox);
   }
 
-  // Register user - generates key if userId is null
+  /// Register user - generates key if userId is null
   Future<void> register(UserHiveModel user) async {
     final key = user.userId ?? _uuid.v4();
 
@@ -37,6 +37,7 @@ class HiveService {
     await _userBox.put(key, userToSave);
   }
 
+  /// Login user by username & password
   Future<UserHiveModel?> login(String username, String password) async {
     try {
       return _userBox.values.firstWhere(
@@ -47,6 +48,7 @@ class HiveService {
     }
   }
 
+  /// Get first (current) user
   Future<UserHiveModel?> getCurrentUser() async {
     if (_userBox.isNotEmpty) {
       return _userBox.values.first;
@@ -54,19 +56,45 @@ class HiveService {
     return null;
   }
 
+  /// Update current user's profile fields (username, bio, location)
+  Future<UserHiveModel?> updateUserProfile({
+    required String username,
+    String? bio,
+    String? location,
+  }) async {
+    final currentUser = await getCurrentUser();
+    if (currentUser != null) {
+      final updatedUser = UserHiveModel(
+        userId: currentUser.userId,
+        username: username,
+        email: currentUser.email,
+        password: currentUser.password,
+        bio: bio,
+        location: location,
+      );
+      await _userBox.put(currentUser.userId!, updatedUser);
+      return updatedUser;
+    }
+    return null;
+  }
+
+  /// Delete user by ID
   Future<void> deleteUser(String id) async {
     await _userBox.delete(id);
   }
 
+  /// Get all users
   Future<List<UserHiveModel>> getAllUsers() async {
     return _userBox.values.toList();
   }
 
+  /// Clear all users
   Future<void> clearAll() async {
     await _userBox.clear();
     await Hive.deleteBoxFromDisk(HiveTableConstant.userBox);
   }
 
+  /// Close Hive box safely
   Future<void> close() async {
     await _userBox.close();
     await Hive.close();
