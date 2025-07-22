@@ -7,6 +7,8 @@ class UserEntity extends Equatable {
   final String password; 
   final String? bio;
   final String? location;
+  final String? profileImageUrl;
+
 
   const UserEntity({
     this.userId,
@@ -15,8 +17,9 @@ class UserEntity extends Equatable {
     required this.password,
     this.bio,
     this.location,
+    this.profileImageUrl,
   });
 
   @override
-  List<Object?> get props => [userId, username, email, password, bio, location];
+  List<Object?> get props => [userId, username, email, password, bio, location, profileImageUrl];
 }

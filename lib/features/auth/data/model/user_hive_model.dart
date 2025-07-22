@@ -19,6 +19,8 @@ class UserHiveModel extends Equatable {
   final String? bio;
   @HiveField(5)
   final String? location;
+  @HiveField(6)
+  final String? profileImageUrl;  // <-- new field
 
   UserHiveModel({
     this.userId,
@@ -27,6 +29,7 @@ class UserHiveModel extends Equatable {
     required this.password,
     this.bio,
     this.location,
+    this.profileImageUrl,
   });
 
   const UserHiveModel.initial()
@@ -35,7 +38,8 @@ class UserHiveModel extends Equatable {
         email = '',
         password = '',
         bio = '',
-        location = '';
+        location = '',
+        profileImageUrl = '';
 
   factory UserHiveModel.fromEntity(UserEntity entity) {
     return UserHiveModel(
@@ -45,6 +49,7 @@ class UserHiveModel extends Equatable {
       password: entity.password,
       bio: entity.bio,
       location: entity.location,
+      profileImageUrl: entity.profileImageUrl,  // <-- map here
     );
   }
 
@@ -56,9 +61,10 @@ class UserHiveModel extends Equatable {
       password: password,
       bio: bio,
       location: location,
+      profileImageUrl: profileImageUrl, // <-- map here
     );
   }
 
   @override
-  List<Object?> get props => [userId, username, email, password, bio, location];
+  List<Object?> get props => [userId, username, email, password, bio, location, profileImageUrl];
 }

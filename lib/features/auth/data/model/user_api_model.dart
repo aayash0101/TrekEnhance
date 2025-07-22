@@ -13,6 +13,7 @@ class UserApiModel extends Equatable {
   final String? password;
   final String? bio;
   final String? location;
+  final String? profileImageUrl;  // <-- new field
 
   const UserApiModel({
     this.userId,
@@ -21,6 +22,7 @@ class UserApiModel extends Equatable {
     this.password,
     this.bio,
     this.location,
+    this.profileImageUrl,
   });
 
   factory UserApiModel.fromJson(Map<String, dynamic> json) =>
@@ -36,6 +38,7 @@ class UserApiModel extends Equatable {
       password: password ?? '',
       bio: bio,
       location: location,
+      profileImageUrl: profileImageUrl,  // <-- map here
     );
   }
 
@@ -47,9 +50,10 @@ class UserApiModel extends Equatable {
       password: entity.password,
       bio: entity.bio,
       location: entity.location,
+      profileImageUrl: entity.profileImageUrl, // <-- map here
     );
   }
 
   @override
-  List<Object?> get props => [userId, username, email, password, bio, location];
+  List<Object?> get props => [userId, username, email, password, bio, location, profileImageUrl];
 }

@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_event.dart';
-import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_state.dart';
-import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_view_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../auth/domain/entity/user_entity.dart';
+import '../view_model/user_profile_event.dart';
+import '../view_model/user_profile_state.dart';
+import '../view_model/user_profile_view_model.dart';
 
 class EditUserProfileView extends StatefulWidget {
   final UserEntity user;
@@ -52,6 +52,7 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
 
   void _saveProfile() {
     if (_formKey.currentState?.validate() ?? false) {
+      // Dispatch update event
       context.read<UserProfileViewModel>().add(
         UpdateUserProfile(
           username: _usernameController.text.trim(),
@@ -59,12 +60,13 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
           location: _locationController.text.trim(),
         ),
       );
+
+      // Upload image if picked
       if (_selectedImage != null) {
         context.read<UserProfileViewModel>().add(
           UploadProfilePicture(_selectedImage!.path),
         );
       }
-      Navigator.pop(context); // close after saving
     }
   }
 
@@ -72,10 +74,25 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
   Widget build(BuildContext context) {
     return BlocListener<UserProfileViewModel, UserProfileState>(
       listener: (context, state) {
+        if (state is UserProfileLoading) {
+          // Show loading overlay
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const Center(child: CircularProgressIndicator()),
+          );
+        } else {
+          // Close loading overlay if open
+          if (Navigator.canPop(context)) Navigator.pop(context);
+        }
+
         if (state is UserProfileError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
+        } else if (state is UserProfileLoaded) {
+          // After successful save, close and return true
+          Navigator.pop(context, true);
         }
       },
       child: Scaffold(
@@ -117,7 +134,7 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
                 _buildTextField(
                   controller: _usernameController,
                   label: 'Username',
-                  validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                  validator: (v) => v == null || v.isEmpty ? 'Username is required' : null,
                 ),
                 const SizedBox(height: 16),
                 _buildTextField(
