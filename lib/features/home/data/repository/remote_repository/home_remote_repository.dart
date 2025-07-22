@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_application_trek_e/core/error/faliure.dart';
+import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:flutter_application_trek_e/features/home/data/data_source/remote_datasource/home_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/home/domain/entity/review_entity.dart';
 import 'package:flutter_application_trek_e/features/home/domain/entity/trek_entity.dart';

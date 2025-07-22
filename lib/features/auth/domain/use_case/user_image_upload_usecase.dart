@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter_application_trek_e/app/use_case/usecase.dart';
-import 'package:flutter_application_trek_e/core/error/faliure.dart';
+import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 
 class UploadImageParams {

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter_application_trek_e/core/error/faliure.dart';
+import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
