@@ -12,11 +12,26 @@ class HiveService {
     final directory = await getApplicationDocumentsDirectory();
     Hive.init(directory.path);
 
+    // Register adapters
     if (!Hive.isAdapterRegistered(HiveTableConstant.userTableId)) {
       Hive.registerAdapter(UserHiveModelAdapter());
     }
 
+    // You can register other adapters too, for example JournalHiveModelAdapter:
+    // if (!Hive.isAdapterRegistered(HiveTableConstant.journalTableId)) {
+    //   Hive.registerAdapter(JournalHiveModelAdapter());
+    // }
+
+    // Open user box
     _userBox = await Hive.openBox<UserHiveModel>(HiveTableConstant.userBox);
+  }
+
+  /// Generic method to open a Hive box of type T (JournalHiveModel, etc.)
+  Future<Box<T>> openBox<T>(String boxName) async {
+    if (!Hive.isBoxOpen(boxName)) {
+      return await Hive.openBox<T>(boxName);
+    }
+    return Hive.box<T>(boxName);
   }
 
   /// Register user - generates key if userId is null
@@ -56,7 +71,7 @@ class HiveService {
     return null;
   }
 
-  /// Update current user's profile fields (username, bio, location)
+  /// Update current user's profile fields
   Future<UserHiveModel?> updateUserProfile({
     required String username,
     String? bio,
