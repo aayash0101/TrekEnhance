@@ -26,4 +26,20 @@ class TrekEntity {
     this.highlights,
     this.reviews,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'location': location,
+      'smallDescription': smallDescription,
+      'description': description,
+      'difficulty': difficulty,
+      'distance': distance,
+      'bestSeason': bestSeason,
+      'imageUrl': imageUrl,
+      'highlights': highlights,
+      // Not including reviews in toJson to avoid deep serialization
+    };
+  }
 }
