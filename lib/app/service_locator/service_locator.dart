@@ -1,9 +1,16 @@
 import 'package:dio/dio.dart';
+// Journal modules (new!)
 import 'package:flutter_application_trek_e/features/journal/data/data_source/local_datasource/journal_local_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/data_source/remote_datasource/journal_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/repository/journal_repository_impl.dart';
 import 'package:flutter_application_trek_e/features/journal/domain/repository/journal_repository.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/create_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/delete_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_all_journals_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_trek_and_user_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_user_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/update_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/presentation/view_model/journal_view_model.dart';
 import 'package:get_it/get_it.dart';
 
 import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
@@ -32,18 +39,9 @@ import 'package:flutter_application_trek_e/features/home/presentation/view_model
 // Splash
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
 
-// Journal modules (new!)
-import 'package:flutter_application_trek_e/features/journals/data/datasource/journal_remote_datasource.dart';
-import 'package:flutter_application_trek_e/features/journals/data/datasource/journal_local_datasource.dart';
-import 'package:flutter_application_trek_e/features/journals/data/repository/journal_repository_impl.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/repository/i_journal_repository.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/usecases/create_journal_usecase.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/usecases/get_all_journals_usecase.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/usecases/get_journals_by_trek_and_user_usecase.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/usecases/get_journals_by_user_usecase.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/usecases/update_journal_usecase.dart';
-import 'package:flutter_application_trek_e/features/journals/domain/usecases/delete_journal_usecase.dart';
-import 'package:flutter_application_trek_e/features/journals/presentation/view_model/journal_view_model.dart';
+
+
+
 
 final GetIt serviceLocator = GetIt.instance;
 
@@ -52,7 +50,7 @@ Future<void> initDependencies() async {
   _initApiModule();
   _initAuthModule();
   _initHomeModule();
-  _initJournalModule();  // ✅ new journal module
+  _initJournalModule();  
   _initSplashModule();
 }
 
@@ -139,7 +137,7 @@ void _initHomeModule() {
 }
 
 void _initJournalModule() {
-  // Local datasource (Hive)
+  // Local datasource
   serviceLocator.registerLazySingleton<JournalLocalDataSource>(
     () => JournalLocalDataSource(hiveService: serviceLocator<HiveService>()),
   );
@@ -158,24 +156,12 @@ void _initJournalModule() {
   );
 
   // Usecases
-  serviceLocator.registerLazySingleton(
-    () => CreateJournalUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => GetAllJournalsUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => GetJournalsByTrekAndUserUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => GetJournalsByUserUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => UpdateJournalUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerLazySingleton(
-    () => DeleteJournalUsecase(serviceLocator<IJournalRepository>()),
-  );
+  serviceLocator.registerFactory(() => CreateJournalUsecase(serviceLocator<IJournalRepository>()));
+  serviceLocator.registerFactory(() => GetAllJournalsUsecase(serviceLocator<IJournalRepository>()));
+  serviceLocator.registerFactory(() => GetJournalsByTrekAndUserUsecase(serviceLocator<IJournalRepository>()));
+  serviceLocator.registerFactory(() => GetJournalsByUserUsecase(serviceLocator<IJournalRepository>()));
+  serviceLocator.registerFactory(() => UpdateJournalUsecase(serviceLocator<IJournalRepository>()));
+  serviceLocator.registerFactory(() => DeleteJournalUsecase(serviceLocator<IJournalRepository>()));
 
   // ViewModel
   serviceLocator.registerFactory(
@@ -189,6 +175,7 @@ void _initJournalModule() {
     ),
   );
 }
+
 
 void _initSplashModule() {
   serviceLocator.registerFactory(() => SplashViewModel());
