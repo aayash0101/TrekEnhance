@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
+import 'package:flutter_application_trek_e/features/home/presentation/view/trek_detail_view.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_event.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_state.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
-import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeView extends StatelessWidget {
-  const HomeView({super.key});
+  const HomeView({Key? key}) : super(key: key);
 
   // Fix image URL for emulator/device
   String fixImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('http')) return url;
-    // Use Android emulator localhost alias:
     return 'http://10.0.2.2:5000$url';
-    // For physical device or iOS simulator, replace with your machine IP address instead of 10.0.2.2
   }
 
   @override
@@ -25,7 +24,10 @@ class HomeView extends StatelessWidget {
         serviceLocator<IHomeRepository>(),
       )..add(LoadTreks()),
       child: Scaffold(
-        appBar: AppBar(title: const Text('Treks'), centerTitle: true),
+        appBar: AppBar(
+          title: const Text('Treks'),
+          centerTitle: true,
+        ),
         body: BlocBuilder<HomeViewModel, HomeState>(
           builder: (context, state) {
             if (state is HomeLoading) {
@@ -36,10 +38,7 @@ class HomeView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final trek = state.treks[index];
                   return Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -71,6 +70,14 @@ class HomeView extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => TrekDetailView(trek: trek),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
