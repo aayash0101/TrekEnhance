@@ -19,6 +19,18 @@ class UserEntity extends Equatable {
     this.profileImageUrl,
   });
 
+  factory UserEntity.fromJson(Map<String, dynamic> json) {
+    return UserEntity(
+      userId: json['_id'] as String?,
+      username: json['username'] ?? '',
+      email: json['email'] ?? '',
+      password: '', // Usually not included for security
+      bio: json['bio'],
+      location: json['location'],
+      profileImageUrl: json['profileImageUrl'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       '_id': userId,
@@ -32,5 +44,13 @@ class UserEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [userId, username, email, password, bio, location, profileImageUrl];
+  List<Object?> get props => [
+        userId,
+        username,
+        email,
+        password,
+        bio,
+        location,
+        profileImageUrl,
+      ];
 }

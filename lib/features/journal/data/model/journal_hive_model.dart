@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_application_trek_e/app/constant/hive_table_constant.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 part 'journal_hive_model.g.dart';
 
@@ -9,25 +9,35 @@ part 'journal_hive_model.g.dart';
 class JournalHiveModel extends Equatable {
   @HiveField(0)
   final String id;
+
   @HiveField(1)
   final String userId;
   @HiveField(2)
-  final String trekId;
+  final String username;
+
   @HiveField(3)
-  final String date;
+  final String trekId;
   @HiveField(4)
-  final String text;
+  final String trekName;
+
   @HiveField(5)
-  final List<String> photos;
+  final String date;
   @HiveField(6)
-  final DateTime createdAt;
+  final String text;
   @HiveField(7)
+  final List<String> photos;
+
+  @HiveField(8)
+  final DateTime createdAt;
+  @HiveField(9)
   final DateTime updatedAt;
 
   JournalHiveModel({
     required this.id,
     required this.userId,
+    required this.username,
     required this.trekId,
+    required this.trekName,
     required this.date,
     required this.text,
     required this.photos,
@@ -39,7 +49,9 @@ class JournalHiveModel extends Equatable {
     return JournalHiveModel(
       id: entity.id,
       userId: entity.userId,
+      username: entity.user?.username ?? 'unknown',
       trekId: entity.trekId,
+      trekName: entity.trek?.name ?? 'unknown',
       date: entity.date,
       text: entity.text,
       photos: entity.photos,
@@ -58,6 +70,8 @@ class JournalHiveModel extends Equatable {
       photos: photos,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      user: null,  // hive cannot store nested objects; keep null
+      trek: null,
     );
   }
 
@@ -65,7 +79,9 @@ class JournalHiveModel extends Equatable {
   List<Object?> get props => [
         id,
         userId,
+        username,
         trekId,
+        trekName,
         date,
         text,
         photos,

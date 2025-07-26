@@ -9,8 +9,10 @@ part of 'journal_api_model.dart';
 JournalApiModel _$JournalApiModelFromJson(Map<String, dynamic> json) =>
     JournalApiModel(
       id: json['_id'] as String?,
-      userId: json['userId'] as String,
-      trekId: json['trekId'] as String,
+      user: UserEntity.fromJson(json['user'] as Map<String, dynamic>),
+      trek: json['trek'] == null
+          ? null
+          : TrekEntity.fromJson(json['trek'] as Map<String, dynamic>),
       date: json['date'] as String,
       text: json['text'] as String,
       photos:
@@ -26,8 +28,8 @@ JournalApiModel _$JournalApiModelFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$JournalApiModelToJson(JournalApiModel instance) =>
     <String, dynamic>{
       '_id': instance.id,
-      'userId': instance.userId,
-      'trekId': instance.trekId,
+      'user': instance.user.toJson(),
+      'trek': instance.trek?.toJson(),
       'date': instance.date,
       'text': instance.text,
       'photos': instance.photos,

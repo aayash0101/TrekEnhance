@@ -40,7 +40,8 @@ class JournalRepositoryImpl implements IJournalRepository {
   Future<Either<Failure, List<JournalEntity>>> getAllJournals() async {
     try {
       final apiModels = await remoteDataSource.getAllJournals();
-      return Right(apiModels.map((e) => e.toEntity()).toList());
+      final entities = apiModels.map((model) => model.toEntity()).toList();
+      return Right(entities);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
     }
@@ -56,7 +57,8 @@ class JournalRepositoryImpl implements IJournalRepository {
         trekId: trekId,
         userId: userId,
       );
-      return Right(apiModels.map((e) => e.toEntity()).toList());
+      final entities = apiModels.map((model) => model.toEntity()).toList();
+      return Right(entities);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
     }
@@ -66,7 +68,8 @@ class JournalRepositoryImpl implements IJournalRepository {
   Future<Either<Failure, List<JournalEntity>>> getJournalsByUser(String userId) async {
     try {
       final apiModels = await remoteDataSource.getJournalsByUser(userId);
-      return Right(apiModels.map((e) => e.toEntity()).toList());
+      final entities = apiModels.map((model) => model.toEntity()).toList();
+      return Right(entities);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
     }

@@ -19,34 +19,40 @@ class JournalHiveModelAdapter extends TypeAdapter<JournalHiveModel> {
     return JournalHiveModel(
       id: fields[0] as String,
       userId: fields[1] as String,
-      trekId: fields[2] as String,
-      date: fields[3] as String,
-      text: fields[4] as String,
-      photos: (fields[5] as List).cast<String>(),
-      createdAt: fields[6] as DateTime,
-      updatedAt: fields[7] as DateTime,
+      username: fields[2] as String,
+      trekId: fields[3] as String,
+      trekName: fields[4] as String,
+      date: fields[5] as String,
+      text: fields[6] as String,
+      photos: (fields[7] as List).cast<String>(),
+      createdAt: fields[8] as DateTime,
+      updatedAt: fields[9] as DateTime,
     );
   }
 
   @override
   void write(BinaryWriter writer, JournalHiveModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
       ..write(obj.userId)
       ..writeByte(2)
-      ..write(obj.trekId)
+      ..write(obj.username)
       ..writeByte(3)
-      ..write(obj.date)
+      ..write(obj.trekId)
       ..writeByte(4)
-      ..write(obj.text)
+      ..write(obj.trekName)
       ..writeByte(5)
-      ..write(obj.photos)
+      ..write(obj.date)
       ..writeByte(6)
-      ..write(obj.createdAt)
+      ..write(obj.text)
       ..writeByte(7)
+      ..write(obj.photos)
+      ..writeByte(8)
+      ..write(obj.createdAt)
+      ..writeByte(9)
       ..write(obj.updatedAt);
   }
 

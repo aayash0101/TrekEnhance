@@ -31,10 +31,6 @@ class JournalEntity {
     final userJson = json['userId'];
     final trekJson = json['trekId'];
 
-    // Debug prints
-    print('userJson: $userJson (${userJson.runtimeType})');
-    print('trekJson: $trekJson (${trekJson.runtimeType})');
-
     String parseId(dynamic data) {
       if (data == null) return '';
       if (data is Map<String, dynamic>) {
@@ -57,36 +53,8 @@ class JournalEntity {
           : [],
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
-      user: (userJson is Map<String, dynamic>)
-          ? UserEntity(
-              userId: userJson['_id'] as String?,
-              username: userJson['username'] ?? '',
-              email: userJson['email'] ?? '',
-              password: '',
-              bio: userJson['bio'],
-              location: userJson['location'],
-              profileImageUrl: userJson['profileImageUrl'],
-            )
-          : null,
-      trek: (trekJson is Map<String, dynamic>)
-          ? TrekEntity(
-              id: trekJson['_id'] as String? ?? '',
-              name: trekJson['name'] ?? '',
-              location: trekJson['location'],
-              smallDescription: trekJson['smallDescription'],
-              description: trekJson['description'],
-              difficulty: trekJson['difficulty'],
-              distance: trekJson['distance'] != null
-                  ? (trekJson['distance'] as num).toDouble()
-                  : null,
-              bestSeason: trekJson['bestSeason'],
-              imageUrl: trekJson['imageUrl'],
-              highlights: trekJson['highlights'] != null
-                  ? List<String>.from(trekJson['highlights'])
-                  : null,
-              reviews: null,
-            )
-          : null,
+      user: (userJson is Map<String, dynamic>) ? UserEntity.fromJson(userJson) : null,
+      trek: (trekJson is Map<String, dynamic>) ? TrekEntity.fromJson(trekJson) : null,
     );
   }
 

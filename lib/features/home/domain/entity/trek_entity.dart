@@ -27,6 +27,26 @@ class TrekEntity {
     this.reviews,
   });
 
+  factory TrekEntity.fromJson(Map<String, dynamic> json) {
+    return TrekEntity(
+      id: json['_id'] as String? ?? '',
+      name: json['name'] ?? '',
+      location: json['location'],
+      smallDescription: json['smallDescription'],
+      description: json['description'],
+      difficulty: json['difficulty'],
+      distance: json['distance'] != null
+          ? (json['distance'] as num).toDouble()
+          : null,
+      bestSeason: json['bestSeason'],
+      imageUrl: json['imageUrl'],
+      highlights: json['highlights'] != null
+          ? List<String>.from(json['highlights'])
+          : null,
+      reviews: null, // or parse if you have review JSON
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
@@ -39,7 +59,7 @@ class TrekEntity {
       'bestSeason': bestSeason,
       'imageUrl': imageUrl,
       'highlights': highlights,
-      // Not including reviews in toJson to avoid deep serialization
+      // reviews not serialized here to avoid deep serialization
     };
   }
 }
