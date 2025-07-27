@@ -1,24 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view/login_view.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
+import 'package:flutter_application_trek_e/features/trek/presentation/view/main_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 
-class Splashscereen extends StatefulWidget {
-  const Splashscereen({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<Splashscereen> createState() => _SplashscereenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashscereenState extends State<Splashscereen>
+class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
+
   @override
   void initState() {
     super.initState();
+
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    Future.delayed(const Duration(seconds: 5), () {
+
+    _checkLoginAndNavigate();
+  }
+
+  Future<void> _checkLoginAndNavigate() async {
+    // Wait at least 2 seconds so splash shows nicely
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Check if current user exists (you can use your GetCurrentUserUsecase)
+    final getCurrentUserUsecase = serviceLocator<UserGetCurrentUsecase>();
+
+    final result = await getCurrentUserUsecase();
+
+    if (!mounted) return;
+
+    if (result.isRight()) {
+      // User logged in → Go to MainView
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainView()),
+      );
+    } else {
+      // No user → Go to LoginView with BlocProvider
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => BlocProvider(
@@ -27,18 +52,14 @@ class _SplashscereenState extends State<Splashscereen>
           ),
         ),
       );
-    });
-  }
+    }
 
-  // If you want, you can restore system UI later:
-  // @override
-  // void dispose() {
-  //   SystemChrome.setEnabledSystemUIMode(
-  //     SystemUiMode.manual,
-  //     overlays: SystemUiOverlay.values,
-  //   );
-  //   super.dispose();
-  // }
+    // Restore system UI overlays after navigation
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -36,7 +36,7 @@ class App extends StatelessWidget {
           title: 'trekEnhance',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.getApplicationTheme(isDarkMode: false),
-          home: const Splashscereen(),
+          home: const SplashScreen(),
         ),
       ),
     );
