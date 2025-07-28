@@ -38,6 +38,11 @@ class UserProfileView extends StatelessWidget {
   }
 
   Widget _buildProfileView(BuildContext context, UserEntity user) {
+    // Optional: build full profile image URL if you have profileImageUrl field
+    // final fullImageUrl = user.profileImageUrl != null
+    //     ? "http://10.0.2.2:5000${user.profileImageUrl}"
+    //     : null;
+
     return SingleChildScrollView(
       child: Column(
         children: [
@@ -45,6 +50,8 @@ class UserProfileView extends StatelessWidget {
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.teal,
+            // If you have profileImageUrl, replace child with backgroundImage
+            // backgroundImage: fullImageUrl != null ? NetworkImage(fullImageUrl) : null,
             child: const Icon(Icons.person, size: 50, color: Colors.white),
           ),
           const SizedBox(height: 10),
@@ -59,7 +66,6 @@ class UserProfileView extends StatelessWidget {
           const SizedBox(height: 20),
           Builder(
             builder: (innerContext) {
-              // innerContext is now inside BlocProvider subtree
               return ElevatedButton.icon(
                 onPressed: () {
                   Navigator.push(
@@ -74,6 +80,11 @@ class UserProfileView extends StatelessWidget {
                 },
                 icon: const Icon(Icons.edit),
                 label: const Text('Edit Profile'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  backgroundColor: Colors.teal,
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
               );
             },
           ),

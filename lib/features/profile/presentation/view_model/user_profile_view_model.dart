@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_event.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_state.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/domain/entity/user_entity.dart';
 import '../../../auth/domain/repository/user_repository.dart';
 
@@ -19,6 +19,7 @@ class UserProfileViewModel extends Bloc<UserProfileEvent, UserProfileState> {
     Emitter<UserProfileState> emit,
   ) async {
     emit(UserProfileLoading());
+
     final result = await userRepository.getCurrentUser();
     result.fold(
       (failure) => emit(UserProfileError(failure.message)),
@@ -31,26 +32,16 @@ class UserProfileViewModel extends Bloc<UserProfileEvent, UserProfileState> {
     Emitter<UserProfileState> emit,
   ) async {
     emit(UserProfileLoading());
-    final currentResult = await userRepository.getCurrentUser();
-    await currentResult.fold(
-      (failure) async => emit(UserProfileError(failure.message)),
-      (user) async {
-        final updatedUser = UserEntity(
-          userId: user.userId,
-          username: event.username,
-          email: user.email,
-          password: user.password,
-          bio: event.bio,
-          location: event.location,
-        );
-        final updateResult = await userRepository.registerUser(
-          updatedUser,
-        ); // same method updates
-        updateResult.fold(
-          (failure) => emit(UserProfileError(failure.message)),
-          (_) => emit(UserProfileLoaded(updatedUser)),
-        );
-      },
+
+    final result = await userRepository.updateUserProfile(
+      username: event.username,
+      bio: event.bio,
+      location: event.location,
+    );
+
+    result.fold(
+      (failure) => emit(UserProfileError(failure.message)),
+      (updatedUser) => emit(UserProfileLoaded(updatedUser)),
     );
   }
 
@@ -59,9 +50,8 @@ class UserProfileViewModel extends Bloc<UserProfileEvent, UserProfileState> {
     Emitter<UserProfileState> emit,
   ) async {
     emit(UserProfilePictureUploading());
-    final result = await userRepository.uploadProfilePicture(
-      File(event.filePath),
-    );
+
+    final result = await userRepository.uploadProfilePicture(File(event.filePath));
     result.fold(
       (failure) => emit(UserProfileError(failure.message)),
       (url) => emit(UserProfilePictureUploaded(url)),
