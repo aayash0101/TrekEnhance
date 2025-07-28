@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
+import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/app/shared_pref/token_shared_prefs.dart';
 import 'package:flutter_application_trek_e/core/network/dio_error_interceptor.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
@@ -10,7 +12,9 @@ class ApiService {
 
   ApiService(this._dio) {
     _dio
-      ..options.baseUrl = ApiEndpoints.serverAddress  // <-- base is just server
+      ..options.baseUrl =
+          ApiEndpoints
+              .serverAddress // <-- base is just server
       ..options.connectTimeout = ApiEndpoints.connectionTimeout
       ..options.receiveTimeout = ApiEndpoints.receiveTimeout
       ..options.headers = {
@@ -18,6 +22,23 @@ class ApiService {
         'Content-Type': 'application/json',
       }
       ..interceptors.addAll([
+        // Inject token interceptor:
+        InterceptorsWrapper(
+          onRequest: (options, handler) async {
+            final tokenResult =
+                await serviceLocator<TokenSharedPrefs>().getToken();
+            tokenResult.fold(
+              (failure) => handler.next(options), // no token, continue
+              (token) {
+                if (token != null && token.isNotEmpty) {
+                  options.headers['Authorization'] = 'Bearer $token';
+                }
+                handler.next(options);
+              },
+            );
+          },
+        ),
+
         DioErrorInterceptor(),
         PrettyDioLogger(
           requestHeader: true,

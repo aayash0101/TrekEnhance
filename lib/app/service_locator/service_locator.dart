@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
-// Journal modules (new!)
+import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
+import 'package:flutter_application_trek_e/features/home/data/data_source/local_datasource/home_local_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/data_source/local_datasource/journal_local_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/data_source/remote_datasource/journal_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/repository/journal_repository_impl.dart';
@@ -11,11 +13,13 @@ import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_
 import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_user_usecase.dart';
 import 'package:flutter_application_trek_e/features/journal/domain/use_case/update_journal_usecase.dart';
 import 'package:flutter_application_trek_e/features/journal/presentation/view_model/journal_view_model.dart';
+
 import 'package:get_it/get_it.dart';
 
-import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
 import 'package:flutter_application_trek_e/core/network/api_service.dart';
 import 'package:flutter_application_trek_e/core/network/hive_service.dart';
+import 'package:flutter_application_trek_e/app/shared_pref/token_shared_prefs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Auth modules
 import 'package:flutter_application_trek_e/features/auth/data/data_source/local_datasource/user_local_datasource.dart';
@@ -30,7 +34,7 @@ import 'package:flutter_application_trek_e/features/auth/presentation/view_model
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/register_view_model/register_view_model.dart';
 
 // Home modules
-import 'package:flutter_application_trek_e/features/home/data/data_source/local_datasource/home_local_datasource.dart';
+import 'package:flutter_application_trek_e/features/home/data/data_source/home_datasource.dart';
 import 'package:flutter_application_trek_e/features/home/data/data_source/remote_datasource/home_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/home/data/repository/home_repository.dart';
 import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
@@ -39,18 +43,15 @@ import 'package:flutter_application_trek_e/features/home/presentation/view_model
 // Splash
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
 
-
-
-
-
 final GetIt serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
   await _initHiveService();
   _initApiModule();
+  await _initSharedPrefsModule();
   _initAuthModule();
   _initHomeModule();
-  _initJournalModule();  
+  _initJournalModule();
   _initSplashModule();
 }
 
@@ -58,6 +59,12 @@ Future<void> _initHiveService() async {
   final hiveService = HiveService();
   await hiveService.init();
   serviceLocator.registerSingleton<HiveService>(hiveService);
+}
+
+Future<void> _initSharedPrefsModule() async {
+  final prefs = await SharedPreferences.getInstance();
+  serviceLocator.registerSingleton<SharedPreferences>(prefs);
+  serviceLocator.registerSingleton(TokenSharedPrefs(sharedPreferences: prefs));
 }
 
 void _initApiModule() {
@@ -73,7 +80,6 @@ void _initApiModule() {
     ),
   );
   serviceLocator.registerSingleton<Dio>(dio);
-
   serviceLocator.registerSingleton<ApiService>(ApiService(dio));
 }
 
@@ -83,30 +89,50 @@ void _initAuthModule() {
   );
 
   serviceLocator.registerFactory<UserRemoteDataSource>(
-    () => UserRemoteDataSource(apiService: serviceLocator<ApiService>()),
+    () => UserRemoteDataSource(
+      apiService: serviceLocator<ApiService>(),
+      hiveService: serviceLocator<HiveService>(),
+    ),
   );
 
+  // Register concrete repositories
   serviceLocator.registerFactory<UserRemoteRepository>(
-    () => UserRemoteRepository(remoteDataSource: serviceLocator<UserRemoteDataSource>()),
+    () => UserRemoteRepository(
+      remoteDataSource: serviceLocator<UserRemoteDataSource>(),
+    ),
   );
 
   serviceLocator.registerFactory<UserLocalRepository>(
-    () => UserLocalRepository(userLocalDatasource: serviceLocator<UserLocalDataSource>()),
+    () => UserLocalRepository(
+      userLocalDatasource: serviceLocator<UserLocalDataSource>(),
+    ),
   );
 
-  serviceLocator.registerFactory(
-    () => UserLoginUsecase(userRepository: serviceLocator<UserRemoteRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => UserRegisterUsecase(userRepository: serviceLocator<UserRemoteRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => UploadImageUsecase(userRepository: serviceLocator<UserRemoteRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => UserGetCurrentUsecase(userRepository: serviceLocator<UserRemoteRepository>()),
+  // ✅ Register IUserRepository interface with your concrete implementation
+  serviceLocator.registerLazySingleton<IUserRepository>(
+    () => UserRemoteRepository(
+      remoteDataSource: serviceLocator<UserRemoteDataSource>(),
+    ),
   );
 
+  // Use cases
+  serviceLocator.registerFactory(
+    () => UserLoginUsecase(userRepository: serviceLocator<IUserRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () =>
+        UserRegisterUsecase(userRepository: serviceLocator<IUserRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => UploadImageUsecase(userRepository: serviceLocator<IUserRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => UserGetCurrentUsecase(
+      userRepository: serviceLocator<IUserRepository>(),
+    ),
+  );
+
+  // ViewModels
   serviceLocator.registerFactory(
     () => RegisterViewModel(
       serviceLocator<UserRegisterUsecase>(),
@@ -114,7 +140,10 @@ void _initAuthModule() {
     ),
   );
   serviceLocator.registerFactory(
-    () => LoginViewModel(serviceLocator<UserLoginUsecase>()),
+    () => LoginViewModel(
+      serviceLocator<UserLoginUsecase>(),
+      serviceLocator<TokenSharedPrefs>(),
+    ),
   );
 }
 
@@ -137,17 +166,14 @@ void _initHomeModule() {
 }
 
 void _initJournalModule() {
-  // Local datasource
   serviceLocator.registerLazySingleton<JournalLocalDataSource>(
     () => JournalLocalDataSource(hiveService: serviceLocator<HiveService>()),
   );
 
-  // Remote datasource
   serviceLocator.registerLazySingleton<JournalRemoteDataSource>(
     () => JournalRemoteDataSource(dio: serviceLocator<Dio>()),
   );
 
-  // Repository
   serviceLocator.registerLazySingleton<IJournalRepository>(
     () => JournalRepositoryImpl(
       remoteDataSource: serviceLocator<JournalRemoteDataSource>(),
@@ -155,20 +181,31 @@ void _initJournalModule() {
     ),
   );
 
-  // Usecases
-  serviceLocator.registerFactory(() => CreateJournalUsecase(serviceLocator<IJournalRepository>()));
-  serviceLocator.registerFactory(() => GetAllJournalsUsecase(serviceLocator<IJournalRepository>()));
-  serviceLocator.registerFactory(() => GetJournalsByTrekAndUserUsecase(serviceLocator<IJournalRepository>()));
-  serviceLocator.registerFactory(() => GetJournalsByUserUsecase(serviceLocator<IJournalRepository>()));
-  serviceLocator.registerFactory(() => UpdateJournalUsecase(serviceLocator<IJournalRepository>()));
-  serviceLocator.registerFactory(() => DeleteJournalUsecase(serviceLocator<IJournalRepository>()));
+  serviceLocator.registerFactory(
+    () => CreateJournalUsecase(serviceLocator<IJournalRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => GetAllJournalsUsecase(serviceLocator<IJournalRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => GetJournalsByTrekAndUserUsecase(serviceLocator<IJournalRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => GetJournalsByUserUsecase(serviceLocator<IJournalRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => UpdateJournalUsecase(serviceLocator<IJournalRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => DeleteJournalUsecase(serviceLocator<IJournalRepository>()),
+  );
 
-  // ViewModel
   serviceLocator.registerFactory(
     () => JournalViewModel(
       createJournalUsecase: serviceLocator<CreateJournalUsecase>(),
       getAllJournalsUsecase: serviceLocator<GetAllJournalsUsecase>(),
-      getJournalsByTrekAndUserUsecase: serviceLocator<GetJournalsByTrekAndUserUsecase>(),
+      getJournalsByTrekAndUserUsecase:
+          serviceLocator<GetJournalsByTrekAndUserUsecase>(),
       getJournalsByUserUsecase: serviceLocator<GetJournalsByUserUsecase>(),
       updateJournalUsecase: serviceLocator<UpdateJournalUsecase>(),
       deleteJournalUsecase: serviceLocator<DeleteJournalUsecase>(),
@@ -176,7 +213,8 @@ void _initJournalModule() {
   );
 }
 
-
 void _initSplashModule() {
-  serviceLocator.registerFactory(() => SplashViewModel());
+  serviceLocator.registerFactory(
+    () => SplashViewModel(tokenSharedPrefs: serviceLocator<TokenSharedPrefs>()),
+  );
 }

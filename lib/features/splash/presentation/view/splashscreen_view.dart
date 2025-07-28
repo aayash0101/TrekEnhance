@@ -20,9 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-
     _checkLoginAndNavigate();
   }
 
@@ -30,20 +28,37 @@ class _SplashScreenState extends State<SplashScreen>
     // Wait at least 2 seconds so splash shows nicely
     await Future.delayed(const Duration(seconds: 2));
 
-    // Check if current user exists (you can use your GetCurrentUserUsecase)
-    final getCurrentUserUsecase = serviceLocator<UserGetCurrentUsecase>();
+    try {
+      final getCurrentUserUsecase = serviceLocator<UserGetCurrentUsecase>();
+      final result = await getCurrentUserUsecase();
 
-    final result = await getCurrentUserUsecase();
+      if (!mounted) return;
 
-    if (!mounted) return;
-
-    if (result.isRight()) {
-      // User logged in → Go to MainView
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainView()),
+      result.fold(
+        (failure) {
+          debugPrint('⚠️ Failed to get current user: ${failure.message}');
+          // Go to LoginView
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => BlocProvider(
+                create: (_) => serviceLocator<LoginViewModel>(),
+                child: const LoginView(),
+              ),
+            ),
+          );
+        },
+        (user) {
+          debugPrint('✅ Current user found: ${user.username}');
+          // Go to MainView
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const MainView()),
+          );
+        },
       );
-    } else {
-      // No user → Go to LoginView with BlocProvider
+    } catch (e) {
+      debugPrint('⚠️ Unexpected error in splash: $e');
+      if (!mounted) return;
+      // Even on unexpected error, go to LoginView
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => BlocProvider(
@@ -52,13 +67,13 @@ class _SplashScreenState extends State<SplashScreen>
           ),
         ),
       );
+    } finally {
+      // Restore system UI overlays after navigation
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: SystemUiOverlay.values,
+      );
     }
-
-    // Restore system UI overlays after navigation
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.manual,
-      overlays: SystemUiOverlay.values,
-    );
   }
 
   @override

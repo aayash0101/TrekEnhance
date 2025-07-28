@@ -7,7 +7,7 @@ part 'user_api_model.g.dart';
 
 @JsonSerializable()
 class UserApiModel extends Equatable {
-  @JsonKey(name: '_id')
+  @JsonKey(name: '_id') // ✅ updated: match backend field name
   final String? userId;
   final String username;
   final String email;

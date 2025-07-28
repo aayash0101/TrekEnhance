@@ -15,10 +15,10 @@ class ApiEndpoints {
 
   // Auth / Users
   static const String register = "signup";                      // POST userBaseUrl + signup
-  static const String login = "login";
-  static const String getProfile = "profile";                           // POST userBaseUrl + login
+  static const String login = "login";                          // POST userBaseUrl + login
+  static String getProfileById(String userId) => "profile/$userId"; // GET userBaseUrl + profile/{userId}
   static const String getAllUsers = "getAllUsers";              // GET userBaseUrl + getAllUsers
-  static const String deleteUserById = "deleteUsers/";          // DELETE userBaseUrl + {id}
+  static String deleteUserById(String userId) => "deleteUsers/$userId"; // DELETE userBaseUrl + deleteUsers/{userId}
   static const String uploadImage = "uploadImage";              // POST userBaseUrl + uploadImage
   static const String updateProfile = "updateProfile";          // PUT userBaseUrl + updateProfile
 
@@ -38,11 +38,7 @@ class ApiEndpoints {
   // Journals
   static const String getAllJournals = "";                      // GET journalBaseUrl
   static String getJournalById(String id) => "$id";             // journalBaseUrl + {id}
-  static const String createJournal = "";                        // POST journalBaseUrl
+  static const String createJournal = "";                       // POST journalBaseUrl
   static String updateJournalById(String id) => "$id";          // PUT journalBaseUrl + {id}
   static String deleteJournalById(String id) => "$id";          // DELETE journalBaseUrl + {id}
-
-  // Example usage:
-  // final url = ApiEndpoints.userBaseUrl + ApiEndpoints.register;
-  // final url = ApiEndpoints.trekBaseUrl + ApiEndpoints.getTrekById("123");
 }

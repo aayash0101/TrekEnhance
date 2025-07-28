@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view/edit_user_profile_view.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_event.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_state.dart';
@@ -14,9 +16,8 @@ class UserProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create:
-          (_) => UserProfileViewModel(context.read()) // read<IUserRepository>()
-          ..add(LoadUserProfile(userId)),
+      create: (_) =>
+          UserProfileViewModel(serviceLocator<IUserRepository>())..add(LoadUserProfile(userId)),
       child: Scaffold(
         appBar: AppBar(title: const Text('Profile')),
         body: BlocBuilder<UserProfileViewModel, UserProfileState>(
@@ -56,17 +57,25 @@ class UserProfileView extends StatelessWidget {
           _buildInfoTile('Bio', user.bio ?? 'No bio'),
           _buildInfoTile('Location', user.location ?? 'No location'),
           const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditUserProfileView(user: user),
-                ),
+          Builder(
+            builder: (innerContext) {
+              // innerContext is now inside BlocProvider subtree
+              return ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    innerContext,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider.value(
+                        value: BlocProvider.of<UserProfileViewModel>(innerContext),
+                        child: EditUserProfileView(user: user),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Profile'),
               );
             },
-            icon: const Icon(Icons.edit),
-            label: const Text('Edit Profile'),
           ),
         ],
       ),

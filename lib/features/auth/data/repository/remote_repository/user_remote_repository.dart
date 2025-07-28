@@ -15,7 +15,8 @@ class UserRemoteRepository implements IUserRepository {
     try {
       await remoteDataSource.registerUser(user);
       return const Right(null);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ registerUser failed: $e\n$stackTrace');
       return Left(RemoteDatabaseFailure(message: "Failed to register: $e"));
     }
   }
@@ -25,7 +26,8 @@ class UserRemoteRepository implements IUserRepository {
     try {
       final token = await remoteDataSource.loginUser(username, password);
       return Right(token);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ loginUser failed: $e\n$stackTrace');
       return Left(RemoteDatabaseFailure(message: "Failed to login: $e"));
     }
   }
@@ -35,7 +37,8 @@ class UserRemoteRepository implements IUserRepository {
     try {
       final imageName = await remoteDataSource.uploadProfilePicture(file);
       return Right(imageName);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ uploadProfilePicture failed: $e\n$stackTrace');
       return Left(RemoteDatabaseFailure(message: "Failed to upload picture: $e"));
     }
   }
@@ -45,7 +48,8 @@ class UserRemoteRepository implements IUserRepository {
     try {
       final user = await remoteDataSource.getCurrentUser();
       return Right(user);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ getCurrentUser failed: $e\n$stackTrace');
       return Left(RemoteDatabaseFailure(message: "Failed to get user: $e"));
     }
   }
@@ -63,7 +67,8 @@ class UserRemoteRepository implements IUserRepository {
         location: location,
       );
       return Right(updatedUser);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ updateUserProfile failed: $e\n$stackTrace');
       return Left(RemoteDatabaseFailure(message: "Failed to update profile: $e"));
     }
   }
