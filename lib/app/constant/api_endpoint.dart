@@ -20,7 +20,8 @@ class ApiEndpoints {
   static const String getAllUsers = "getAllUsers";              // GET userBaseUrl + getAllUsers
   static String deleteUserById(String userId) => "deleteUsers/$userId"; // DELETE userBaseUrl + deleteUsers/{userId}
   static const String uploadImage = "uploadImage";              // POST userBaseUrl + uploadImage
-  static const String updateProfile = "updateProfile";          // PUT userBaseUrl + updateProfile
+ static String updateProfileById(String userId) => "profile/$userId"; 
+         // PUT userBaseUrl + updateProfile
 
   // Treks
   static const String getAllTreks = "";                         // GET trekBaseUrl

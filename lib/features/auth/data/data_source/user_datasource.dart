@@ -19,5 +19,6 @@ abstract interface class IUserDataSource {
     required String username,
     String? bio,
     String? location,
+    String? profileImageUrl,
   });
 }

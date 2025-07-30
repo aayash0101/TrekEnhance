@@ -23,6 +23,7 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
   late TextEditingController _locationController;
 
   File? _selectedImage;
+  String? _uploadedImageUrl;
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
     _usernameController = TextEditingController(text: widget.user.username);
     _bioController = TextEditingController(text: widget.user.bio ?? '');
     _locationController = TextEditingController(text: widget.user.location ?? '');
+    _uploadedImageUrl = widget.user.profileImageUrl;
   }
 
   @override
@@ -50,23 +52,38 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
     }
   }
 
-  void _saveProfile() {
+  Future<void> _saveProfile() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Dispatch update event
-      context.read<UserProfileViewModel>().add(
+      final userProfileVM = context.read<UserProfileViewModel>();
+
+      if (_selectedImage != null) {
+        // 1. Upload image first
+        userProfileVM.add(UploadProfilePicture(_selectedImage!.path));
+
+        // Listen once for upload completion to get URL and then update profile
+        await userProfileVM.stream.firstWhere((state) =>
+            state is UserProfileLoaded || state is UserProfileError);
+
+        final currentState = userProfileVM.state;
+        if (currentState is UserProfileLoaded) {
+          _uploadedImageUrl = currentState.user.profileImageUrl;
+        } else if (currentState is UserProfileError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(currentState.message)),
+          );
+          return; // Stop if upload failed
+        }
+      }
+
+      // 2. Update profile with username, bio, location, and uploadedImageUrl
+      userProfileVM.add(
         UpdateUserProfile(
           username: _usernameController.text.trim(),
           bio: _bioController.text.trim(),
           location: _locationController.text.trim(),
+          profileImageUrl: _uploadedImageUrl,
         ),
       );
-
-      // Upload image if picked
-      if (_selectedImage != null) {
-        context.read<UserProfileViewModel>().add(
-          UploadProfilePicture(_selectedImage!.path),
-        );
-      }
     }
   }
 
@@ -74,7 +91,7 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
   Widget build(BuildContext context) {
     return BlocListener<UserProfileViewModel, UserProfileState>(
       listener: (context, state) {
-        if (state is UserProfileLoading) {
+        if (state is UserProfileLoading || state is UserProfilePictureUploading) {
           // Show loading overlay
           showDialog(
             context: context,
@@ -109,9 +126,13 @@ class _EditUserProfileViewState extends State<EditUserProfileView> {
                       CircleAvatar(
                         radius: 50,
                         backgroundColor: Colors.teal[100],
-                        backgroundImage:
-                            _selectedImage != null ? FileImage(_selectedImage!) : null,
-                        child: _selectedImage == null
+                        backgroundImage: _selectedImage != null
+                            ? FileImage(_selectedImage!)
+                            : (_uploadedImageUrl != null && _uploadedImageUrl!.isNotEmpty)
+                                ? NetworkImage(_uploadedImageUrl!) as ImageProvider
+                                : null,
+                        child: (_selectedImage == null &&
+                                (_uploadedImageUrl == null || _uploadedImageUrl!.isEmpty))
                             ? const Icon(Icons.person, size: 50, color: Colors.white)
                             : null,
                       ),

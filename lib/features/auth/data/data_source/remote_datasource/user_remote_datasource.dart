@@ -172,6 +172,7 @@ class UserRemoteDataSource implements IUserDataSource {
     required String username,
     String? bio,
     String? location,
+    String? profileImageUrl,
   }) async {
     try {
       final userId = await hiveService.getUserId();
@@ -180,11 +181,12 @@ class UserRemoteDataSource implements IUserDataSource {
       print('📌 Updating userId from Hive: $userId');
 
       final response = await apiService.dio.put(
-        '${ApiEndpoints.userBaseUrl}${ApiEndpoints.updateProfile}/$userId',
+        '${ApiEndpoints.userBaseUrl}${ApiEndpoints.updateProfileById(userId)}',
         data: {
           'username': username,
           if (bio != null) 'bio': bio,
           if (location != null) 'location': location,
+          if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
         },
       );
 

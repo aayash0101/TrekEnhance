@@ -9,11 +9,13 @@ class UpdateUserProfile extends UserProfileEvent {
   final String username;
   final String bio;
   final String location;
+  final String? profileImageUrl;  // Add this line as optional
 
   UpdateUserProfile({
     required this.username,
     required this.bio,
     required this.location,
+    this.profileImageUrl,          // Add this line
   });
 }
 

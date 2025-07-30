@@ -27,6 +27,8 @@ class UserProfileView extends StatelessWidget {
             } else if (state is UserProfileLoaded) {
               final user = state.user;
               return _buildProfileView(context, user);
+            } else if (state is UserProfilePictureUploading) {
+              return const Center(child: CircularProgressIndicator());
             } else if (state is UserProfileError) {
               return Center(child: Text(state.message));
             }
@@ -38,21 +40,24 @@ class UserProfileView extends StatelessWidget {
   }
 
   Widget _buildProfileView(BuildContext context, UserEntity user) {
-    // Optional: build full profile image URL if you have profileImageUrl field
-    // final fullImageUrl = user.profileImageUrl != null
-    //     ? "http://10.0.2.2:5000${user.profileImageUrl}"
-    //     : null;
+    // Build full image URL if profileImageUrl is set
+    final imageUrl = user.profileImageUrl;
+    final fullImageUrl = (imageUrl != null && imageUrl.isNotEmpty)
+        ? "http://10.0.2.2:5000/uploads/$imageUrl"
+        : null;
 
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           const SizedBox(height: 20),
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.teal,
-            // If you have profileImageUrl, replace child with backgroundImage
-            // backgroundImage: fullImageUrl != null ? NetworkImage(fullImageUrl) : null,
-            child: const Icon(Icons.person, size: 50, color: Colors.white),
+            backgroundImage: fullImageUrl != null ? NetworkImage(fullImageUrl) : null,
+            child: fullImageUrl == null
+                ? const Icon(Icons.person, size: 50, color: Colors.white)
+                : null,
           ),
           const SizedBox(height: 10),
           Text(
@@ -64,6 +69,8 @@ class UserProfileView extends StatelessWidget {
           _buildInfoTile('Bio', user.bio ?? 'No bio'),
           _buildInfoTile('Location', user.location ?? 'No location'),
           const SizedBox(height: 20),
+
+          // Edit profile button
           Builder(
             builder: (innerContext) {
               return ElevatedButton.icon(
@@ -80,6 +87,25 @@ class UserProfileView extends StatelessWidget {
                 },
                 icon: const Icon(Icons.edit),
                 label: const Text('Edit Profile'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  backgroundColor: Colors.teal,
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+
+          // Upload profile picture button
+          Builder(
+            builder: (innerContext) {
+              return ElevatedButton.icon(
+                onPressed: () {
+                  BlocProvider.of<UserProfileViewModel>(innerContext).pickAndUploadProfilePicture();
+                },
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Upload Picture'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                   backgroundColor: Colors.teal,

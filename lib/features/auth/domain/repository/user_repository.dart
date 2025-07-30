@@ -24,6 +24,7 @@ abstract interface class IUserRepository {
     required String username,
     String? bio,
     String? location,
+    String? profileImageUrl, 
   });
   
 }

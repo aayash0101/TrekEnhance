@@ -50,6 +50,7 @@ class UserLocalDataSource implements IUserDataSource {
     required String username,
     String? bio,
     String? location,
+    String? profileImageUrl,
   }) async {
     final updatedUser = await hiveService.updateUserProfile(
       username: username,

@@ -59,12 +59,14 @@ class UserRemoteRepository implements IUserRepository {
     required String username,
     String? bio,
     String? location,
+    String? profileImageUrl
   }) async {
     try {
       final updatedUser = await remoteDataSource.updateUserProfile(
         username: username,
         bio: bio,
         location: location,
+        profileImageUrl: profileImageUrl,
       );
       return Right(updatedUser);
     } catch (e, stackTrace) {
