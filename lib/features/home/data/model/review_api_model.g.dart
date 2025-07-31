@@ -8,10 +8,11 @@ part of 'review_api_model.dart';
 
 ReviewApiModel _$ReviewApiModelFromJson(Map<String, dynamic> json) =>
     ReviewApiModel(
-      userId: json['userId'] as String,
-      username: json['username'] as String,
-      review: json['review'] as String,
-      date: DateTime.parse(json['date'] as String),
+      userId: json['userId'] as String?,
+      username: json['username'] as String?,
+      review: json['review'] as String?,
+      date:
+          json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );
 
 Map<String, dynamic> _$ReviewApiModelToJson(ReviewApiModel instance) =>
@@ -19,5 +20,5 @@ Map<String, dynamic> _$ReviewApiModelToJson(ReviewApiModel instance) =>
       'userId': instance.userId,
       'username': instance.username,
       'review': instance.review,
-      'date': instance.date.toIso8601String(),
+      'date': instance.date?.toIso8601String(),
     };

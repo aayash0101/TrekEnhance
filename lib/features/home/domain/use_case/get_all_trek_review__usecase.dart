@@ -4,7 +4,8 @@ import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:flutter_application_trek_e/features/home/domain/entity/review_entity.dart';
 import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
 
-class GetAllReviewsFromAllTreksUsecase implements UsecaseWithoutParams<List<ReviewEntity>> {
+class GetAllReviewsFromAllTreksUsecase
+    implements UsecaseWithoutParams<List<ReviewEntity>> {
   final IHomeRepository repository;
 
   GetAllReviewsFromAllTreksUsecase(this.repository);

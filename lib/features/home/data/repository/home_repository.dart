@@ -45,9 +45,8 @@ class HomeRepository implements IHomeRepository {
         review: review,
       );
 
-      // After adding review, fetch updated trek to get updated reviews:
-      final trek = await remoteDatasource.getTrekById(trekId);
-      return Right(trek.reviews ?? []);
+      final updatedTrek = await remoteDatasource.getTrekById(trekId);
+      return Right(updatedTrek.reviews ?? []);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
     }
@@ -56,8 +55,8 @@ class HomeRepository implements IHomeRepository {
   @override
   Future<Either<Failure, List<ReviewEntity>>> getAllReviewsFromAllTreks() async {
     try {
-      final allReviews = await remoteDatasource.getAllReviewsFromAllTreks();
-      return Right(allReviews);
+      final reviews = await remoteDatasource.getAllReviewsFromAllTreks();
+      return Right(reviews);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
     }
@@ -66,7 +65,6 @@ class HomeRepository implements IHomeRepository {
   @override
   Future<Either<Failure, List<ReviewEntity>>> getReviews(String trekId) async {
     try {
-      // Fetch single trek and return its reviews
       final trek = await remoteDatasource.getTrekById(trekId);
       return Right(trek.reviews ?? []);
     } catch (e) {

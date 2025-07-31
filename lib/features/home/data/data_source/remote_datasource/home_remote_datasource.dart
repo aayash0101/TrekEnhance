@@ -18,7 +18,9 @@ class HomeRemoteDatasource implements IHomeRemoteDataSource {
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;
-      return data.map((json) => TrekApiModel.fromJson(json).toEntity()).toList();
+      return data
+          .map((json) => TrekApiModel.fromJson(json).toEntity())
+          .toList();
     } else {
       throw Exception('Failed to fetch treks');
     }
@@ -29,7 +31,6 @@ class HomeRemoteDatasource implements IHomeRemoteDataSource {
     final response = await dio.get(
       ApiEndpoints.trekBaseUrl + ApiEndpoints.getTrekById(id),
     );
-
     if (response.statusCode == 200) {
       return TrekApiModel.fromJson(response.data).toEntity();
     } else {
@@ -44,7 +45,17 @@ class HomeRemoteDatasource implements IHomeRemoteDataSource {
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;
-      return data.map((json) => ReviewApiModel.fromJson(json).toEntity()).toList();
+
+      final List<ReviewEntity> allReviews = [];
+
+      for (final trekJson in data) {
+        final trekReviews = trekJson['reviews'] as List<dynamic>? ?? [];
+        for (final reviewJson in trekReviews) {
+          allReviews.add(ReviewApiModel.fromJson(reviewJson).toEntity());
+        }
+      }
+
+      return allReviews;
     } else {
       throw Exception('Failed to fetch reviews');
     }
@@ -57,7 +68,9 @@ class HomeRemoteDatasource implements IHomeRemoteDataSource {
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = response.data;
-      return data.map((json) => ReviewApiModel.fromJson(json).toEntity()).toList();
+      return data
+          .map((json) => ReviewApiModel.fromJson(json).toEntity())
+          .toList();
     } else {
       throw Exception('Failed to fetch reviews for trek $trekId');
     }

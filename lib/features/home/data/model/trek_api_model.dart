@@ -34,11 +34,14 @@ class TrekApiModel extends Equatable {
     this.reviews,
   });
 
+  /// ✅ From JSON
   factory TrekApiModel.fromJson(Map<String, dynamic> json) =>
       _$TrekApiModelFromJson(json);
 
+  /// ✅ To JSON
   Map<String, dynamic> toJson() => _$TrekApiModelToJson(this);
 
+  /// ✅ Convert from Domain Entity to API Model
   factory TrekApiModel.fromEntity(TrekEntity entity) {
     return TrekApiModel(
       id: entity.id,
@@ -57,6 +60,7 @@ class TrekApiModel extends Equatable {
     );
   }
 
+  /// ✅ Convert to Domain Entity
   TrekEntity toEntity() {
     return TrekEntity(
       id: id ?? '',
@@ -69,7 +73,7 @@ class TrekApiModel extends Equatable {
       bestSeason: bestSeason,
       imageUrl: imageUrl,
       highlights: highlights,
-      reviews: reviews?.map((r) => r.toEntity()).toList(),
+      reviews: reviews?.map((r) => r.toEntity()).toList() ?? [],
     );
   }
 

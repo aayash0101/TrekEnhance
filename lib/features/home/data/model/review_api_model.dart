@@ -6,16 +6,18 @@ part 'review_api_model.g.dart';
 
 @JsonSerializable()
 class ReviewApiModel extends Equatable {
-  final String userId;
-  final String username;
-  final String review;
-  final DateTime date;
+  final String? userId;
+  final String? username;
+  final String? review;
+
+  // Make date nullable to handle missing values
+  final DateTime? date;
 
   const ReviewApiModel({
-    required this.userId,
-    required this.username,
-    required this.review,
-    required this.date,
+    this.userId,
+    this.username,
+    this.review,
+    this.date,
   });
 
   factory ReviewApiModel.fromJson(Map<String, dynamic> json) =>
@@ -34,10 +36,10 @@ class ReviewApiModel extends Equatable {
 
   ReviewEntity toEntity() {
     return ReviewEntity(
-      userId: userId,
-      username: username,
-      review: review,
-      date: date,
+      userId: userId ?? '',              // fallback to empty if null
+      username: username ?? '',
+      review: review ?? '',
+      date: date ?? DateTime.now(),      // fallback to now if null
     );
   }
 

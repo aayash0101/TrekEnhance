@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 import 'package:flutter_application_trek_e/features/home/data/data_source/local_datasource/home_local_datasource.dart';
+import 'package:flutter_application_trek_e/features/home/domain/use_case/get_all_trek_review__usecase.dart';
+import 'package:flutter_application_trek_e/features/home/domain/use_case/get_all_treks_usecase.dart';
 import 'package:flutter_application_trek_e/features/journal/data/data_source/local_datasource/journal_local_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/data_source/remote_datasource/journal_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/journal/data/repository/journal_repository_impl.dart';
@@ -13,6 +15,7 @@ import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_
 import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_user_usecase.dart';
 import 'package:flutter_application_trek_e/features/journal/domain/use_case/update_journal_usecase.dart';
 import 'package:flutter_application_trek_e/features/journal/presentation/view_model/journal_view_model.dart';
+import 'package:flutter_application_trek_e/features/trek/presentation/view_model/review_view_model.dart';
 
 import 'package:get_it/get_it.dart';
 
@@ -162,6 +165,21 @@ void _initHomeModule() {
 
   serviceLocator.registerFactory(
     () => HomeViewModel(serviceLocator<IHomeRepository>()),
+  );
+
+  serviceLocator.registerFactory(
+    () => GetAllReviewsFromAllTreksUsecase(serviceLocator<IHomeRepository>()),
+  );
+
+  // <-- Added registration for GetAllTreksUsecase -->
+  serviceLocator.registerFactory(
+    () => GetAllTreksUsecase(serviceLocator<IHomeRepository>()),
+  );
+
+  serviceLocator.registerFactory<ReviewViewModel>(
+    () => ReviewViewModel(
+      getAllTreksUsecase: serviceLocator<GetAllTreksUsecase>(),
+    ),
   );
 }
 

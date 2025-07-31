@@ -4,6 +4,7 @@ import 'package:flutter_application_trek_e/features/journal/presentation/view/jo
 import 'package:flutter_application_trek_e/features/profile/presentation/view/user_profile_view.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
+import 'package:flutter_application_trek_e/features/trek/presentation/view/review_view.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -16,11 +17,18 @@ class _MainViewState extends State<MainView> {
   int _selectedIndex = 0;
   String? _userId;
   bool _isLoading = true;
+
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
+    _pages = [
+      const HomeView(),
+      const JournalView(),
+      const ReviewView(), // use default constructor, BlocProvider handles usecase inside
+      const SizedBox(), // placeholder, will replace with UserProfileView when userId loads
+    ];
     _fetchCurrentUserId();
   }
 
@@ -30,7 +38,6 @@ class _MainViewState extends State<MainView> {
 
     result.fold(
       (failure) {
-        // Handle failure gracefully
         setState(() {
           _userId = null;
           _isLoading = false;
@@ -41,22 +48,17 @@ class _MainViewState extends State<MainView> {
           _userId = userEntity.userId;
           _isLoading = false;
 
-          _pages = [
-            const HomeView(),
-            const JournalView(),
-            UserProfileView(userId: _userId!),
-          ];
+          // Now this works because _pages is mutable
+          _pages[_pages.length - 1] = UserProfileView(userId: _userId!);
         });
       },
     );
   }
 
   void _onItemTapped(int index) {
-    if (index != _selectedIndex) {
-      setState(() {
-        _selectedIndex = index;
-      });
-    }
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -91,6 +93,10 @@ class _MainViewState extends State<MainView> {
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
             label: 'Journals',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.reviews),
+            label: 'Reviews',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
