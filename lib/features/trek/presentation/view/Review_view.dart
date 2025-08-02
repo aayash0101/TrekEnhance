@@ -5,9 +5,17 @@ import 'package:flutter_application_trek_e/features/trek/presentation/view_model
 import 'package:flutter_application_trek_e/features/trek/presentation/view_model/review_state.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart'; // ✅ import your endpoint
 
 class ReviewView extends StatelessWidget {
   const ReviewView({super.key});
+
+  /// Helper to ensure full image URL
+  String _getFullImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return '${ApiEndpoints.serverAddress}$imageUrl';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +69,11 @@ class ReviewView extends StatelessWidget {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.network(
-                                trek.imageUrl!,
+                                _getFullImageUrl(trek.imageUrl),
                                 height: 150,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Text('Image not available'),
                               ),
                             ),
                           const SizedBox(height: 8),
