@@ -1,34 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
-import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 import 'package:flutter_application_trek_e/features/home/data/data_source/local_datasource/home_local_datasource.dart';
-import 'package:flutter_application_trek_e/features/home/domain/use_case/get_all_trek_review__usecase.dart';
-import 'package:flutter_application_trek_e/features/home/domain/use_case/get_all_treks_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/data/data_source/local_datasource/journal_local_datasource.dart';
-import 'package:flutter_application_trek_e/features/journal/data/data_source/remote_datasource/journal_remote_datasource.dart';
-import 'package:flutter_application_trek_e/features/journal/data/repository/journal_repository_impl.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/repository/journal_repository.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/create_journal_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/delete_journal_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_all_journals_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_trek_and_user_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_user_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/domain/use_case/update_journal_usecase.dart';
-import 'package:flutter_application_trek_e/features/journal/presentation/view_model/journal_view_model.dart';
-import 'package:flutter_application_trek_e/features/trek/presentation/view_model/review_view_model.dart';
-
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+// Core and shared
 import 'package:flutter_application_trek_e/core/network/api_service.dart';
 import 'package:flutter_application_trek_e/core/network/hive_service.dart';
 import 'package:flutter_application_trek_e/app/shared_pref/token_shared_prefs.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Auth modules
 import 'package:flutter_application_trek_e/features/auth/data/data_source/local_datasource/user_local_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/remote_datasource/user_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/repository/local_repository/user_local_repository.dart';
 import 'package:flutter_application_trek_e/features/auth/data/repository/remote_repository/user_remote_repository.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_image_upload_usecase.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_login_usecase.dart';
@@ -41,9 +27,25 @@ import 'package:flutter_application_trek_e/features/home/data/data_source/home_d
 import 'package:flutter_application_trek_e/features/home/data/data_source/remote_datasource/home_remote_datasource.dart';
 import 'package:flutter_application_trek_e/features/home/data/repository/home_repository.dart';
 import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
+import 'package:flutter_application_trek_e/features/home/domain/use_case/get_all_trek_review__usecase.dart';
+import 'package:flutter_application_trek_e/features/home/domain/use_case/get_all_treks_usecase.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
+import 'package:flutter_application_trek_e/features/trek/presentation/view_model/review_view_model.dart';
 
-// Splash
+// Journal modules
+import 'package:flutter_application_trek_e/features/journal/data/data_source/local_datasource/journal_local_datasource.dart';
+import 'package:flutter_application_trek_e/features/journal/data/data_source/remote_datasource/journal_remote_datasource.dart';
+import 'package:flutter_application_trek_e/features/journal/data/repository/journal_repository_impl.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/repository/journal_repository.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/create_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/delete_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_all_journals_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_trek_and_user_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journals_by_user_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/update_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/presentation/view_model/journal_view_model.dart';
+
+// Splash module
 import 'package:flutter_application_trek_e/features/splash/presentation/view_model/splash_view_model.dart';
 
 final GetIt serviceLocator = GetIt.instance;
@@ -87,6 +89,7 @@ void _initApiModule() {
 }
 
 void _initAuthModule() {
+  // Data sources
   serviceLocator.registerFactory<UserLocalDataSource>(
     () => UserLocalDataSource(hiveService: serviceLocator<HiveService>()),
   );
@@ -98,20 +101,7 @@ void _initAuthModule() {
     ),
   );
 
-  // Register concrete repositories
-  serviceLocator.registerFactory<UserRemoteRepository>(
-    () => UserRemoteRepository(
-      remoteDataSource: serviceLocator<UserRemoteDataSource>(),
-    ),
-  );
-
-  serviceLocator.registerFactory<UserLocalRepository>(
-    () => UserLocalRepository(
-      userLocalDatasource: serviceLocator<UserLocalDataSource>(),
-    ),
-  );
-
-  // ✅ Register IUserRepository interface with your concrete implementation
+  // Repositories
   serviceLocator.registerLazySingleton<IUserRepository>(
     () => UserRemoteRepository(
       remoteDataSource: serviceLocator<UserRemoteDataSource>(),
@@ -123,16 +113,13 @@ void _initAuthModule() {
     () => UserLoginUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
   serviceLocator.registerFactory(
-    () =>
-        UserRegisterUsecase(userRepository: serviceLocator<IUserRepository>()),
+    () => UserRegisterUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
   serviceLocator.registerFactory(
     () => UploadImageUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
   serviceLocator.registerFactory(
-    () => UserGetCurrentUsecase(
-      userRepository: serviceLocator<IUserRepository>(),
-    ),
+    () => UserGetCurrentUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
 
   // ViewModels
@@ -151,6 +138,7 @@ void _initAuthModule() {
 }
 
 void _initHomeModule() {
+  // Data sources
   serviceLocator.registerLazySingleton<HomeLocalDataSource>(
     () => HomeLocalDataSource(),
   );
@@ -159,21 +147,23 @@ void _initHomeModule() {
     () => HomeRemoteDatasource(dio: serviceLocator<Dio>()),
   );
 
+  // Repository
   serviceLocator.registerLazySingleton<IHomeRepository>(
     () => HomeRepository(serviceLocator<HomeRemoteDatasource>()),
   );
 
-  serviceLocator.registerFactory(
-    () => HomeViewModel(serviceLocator<IHomeRepository>()),
-  );
-
+  // Use cases
   serviceLocator.registerFactory(
     () => GetAllReviewsFromAllTreksUsecase(serviceLocator<IHomeRepository>()),
   );
 
-  // <-- Added registration for GetAllTreksUsecase -->
   serviceLocator.registerFactory(
     () => GetAllTreksUsecase(serviceLocator<IHomeRepository>()),
+  );
+
+  // ViewModels
+  serviceLocator.registerFactory<HomeViewModel>(
+    () => HomeViewModel(serviceLocator<IHomeRepository>()),
   );
 
   serviceLocator.registerFactory<ReviewViewModel>(
@@ -184,6 +174,7 @@ void _initHomeModule() {
 }
 
 void _initJournalModule() {
+  // Data sources
   serviceLocator.registerLazySingleton<JournalLocalDataSource>(
     () => JournalLocalDataSource(hiveService: serviceLocator<HiveService>()),
   );
@@ -192,6 +183,7 @@ void _initJournalModule() {
     () => JournalRemoteDataSource(dio: serviceLocator<Dio>()),
   );
 
+  // Repository
   serviceLocator.registerLazySingleton<IJournalRepository>(
     () => JournalRepositoryImpl(
       remoteDataSource: serviceLocator<JournalRemoteDataSource>(),
@@ -199,6 +191,7 @@ void _initJournalModule() {
     ),
   );
 
+  // Use cases
   serviceLocator.registerFactory(
     () => CreateJournalUsecase(serviceLocator<IJournalRepository>()),
   );
@@ -218,12 +211,12 @@ void _initJournalModule() {
     () => DeleteJournalUsecase(serviceLocator<IJournalRepository>()),
   );
 
+  // ViewModel
   serviceLocator.registerFactory(
     () => JournalViewModel(
       createJournalUsecase: serviceLocator<CreateJournalUsecase>(),
       getAllJournalsUsecase: serviceLocator<GetAllJournalsUsecase>(),
-      getJournalsByTrekAndUserUsecase:
-          serviceLocator<GetJournalsByTrekAndUserUsecase>(),
+      getJournalsByTrekAndUserUsecase: serviceLocator<GetJournalsByTrekAndUserUsecase>(),
       getJournalsByUserUsecase: serviceLocator<GetJournalsByUserUsecase>(),
       updateJournalUsecase: serviceLocator<UpdateJournalUsecase>(),
       deleteJournalUsecase: serviceLocator<DeleteJournalUsecase>(),

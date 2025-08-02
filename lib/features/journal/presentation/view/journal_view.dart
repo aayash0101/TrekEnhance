@@ -55,6 +55,12 @@ class _JournalViewState extends State<JournalView> {
     }
   }
 
+  // Helper to convert relative URLs to absolute URLs for images
+  String fixImageUrl(String url) {
+    if (url.startsWith('http')) return url;
+    return 'http://10.0.2.2:5000$url'; // Adjust base URL as needed
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -344,7 +350,7 @@ class _JournalViewState extends State<JournalView> {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Image.network(
-                                        photoUrl,
+                                        fixImageUrl(photoUrl),
                                         fit: BoxFit.cover,
                                         loadingBuilder: (context, child, loadingProgress) {
                                           if (loadingProgress == null) return child;
