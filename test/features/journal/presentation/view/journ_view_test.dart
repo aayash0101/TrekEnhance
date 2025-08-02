@@ -1,46 +1,110 @@
-import 'package:flutter_application_trek_e/features/journal/data/model/journal_api_model.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
+import 'package:flutter_application_trek_e/features/journal/presentation/view/journal_view.dart';
+import 'package:flutter_application_trek_e/features/journal/presentation/view_model/journal_view_model.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
+import 'package:flutter_application_trek_e/features/home/domain/entity/trek_entity.dart';
+
+// Mock ViewModel
+class MockJournalViewModel extends Mock implements JournalViewModel {}
 
 void main() {
-  final sampleJson = {
-    "_id": "journal123",
-    "userId": {
-      "_id": "user456",
-      "username": "JohnDoe",
-      "email": "john@example.com",
-      "bio": "Hello there",
-      "location": "Earth",
-      "profileImageUrl": "http://image.url/profile.jpg"
-    },
-    "trekId": {
-      "_id": "trek789",
-      "name": "Everest Base Camp",
-      "location": "Nepal",
-      "smallDescription": "A tough trek",
-      "description": "Amazing views",
-      "difficulty": "Hard",
-      "distance": 130.5,
-      "bestSeason": "Spring",
-      "imageUrl": "http://image.url/trek.jpg",
-      "highlights": ["Snow", "Mountains", "Adventure"]
-    },
-    "date": "2025-07-26",
-    "text": "Awesome trek!",
-    "photos": ["photo1.jpg", "photo2.jpg"],
-    "createdAt": "2025-07-20T12:00:00Z",
-    "updatedAt": "2025-07-21T12:00:00Z"
-  };
+  late MockJournalViewModel mockViewModel;
 
-  final journalApiModel = JournalApiModel.fromJson(sampleJson);
-  final journalEntity = journalApiModel.toEntity();
+  setUp(() {
+    mockViewModel = MockJournalViewModel();
 
-  print('Journal ID: ${journalEntity.id}');
-  print('User ID: ${journalEntity.userId}');
-  print('User username: ${journalEntity.user?.username}');
-  print('Trek ID: ${journalEntity.trekId}');
-  print('Trek name: ${journalEntity.trek?.name}');
-  print('Date: ${journalEntity.date}');
-  print('Text: ${journalEntity.text}');
-  print('Photos: ${journalEntity.photos}');
-  print('Created At: ${journalEntity.createdAt}');
-  print('Updated At: ${journalEntity.updatedAt}');
+    // Always stub these methods to avoid Null -> Future<void> errors
+    when(() => mockViewModel.fetchAllJournals()).thenAnswer((_) async {});
+    when(() => mockViewModel.filterJournals(any())).thenReturn(null);
+  });
+
+  Widget createWidgetUnderTest() {
+    return MaterialApp(
+      home: ChangeNotifierProvider<JournalViewModel>.value(
+        value: mockViewModel,
+        child: const JournalView(),
+      ),
+    );
+  }
+
+  testWidgets('shows loading indicator when isLoading is true', (WidgetTester tester) async {
+    when(() => mockViewModel.isLoading).thenReturn(true);
+    when(() => mockViewModel.error).thenReturn(null);
+    when(() => mockViewModel.filteredJournals).thenReturn([]);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Loading journal entries...'), findsOneWidget);
+  });
+
+  testWidgets('shows error UI when error is set', (WidgetTester tester) async {
+    when(() => mockViewModel.isLoading).thenReturn(false);
+    when(() => mockViewModel.error).thenReturn('Something went wrong');
+    when(() => mockViewModel.filteredJournals).thenReturn([]);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    expect(find.text('Oops! Something went wrong'), findsOneWidget);
+    expect(find.text('Error: Something went wrong'), findsOneWidget);
+    expect(find.byIcon(Icons.error_outline), findsOneWidget);
+  });
+
+  testWidgets('shows empty state when filteredJournals is empty', (WidgetTester tester) async {
+    when(() => mockViewModel.isLoading).thenReturn(false);
+    when(() => mockViewModel.error).thenReturn(null);
+    when(() => mockViewModel.filteredJournals).thenReturn([]);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    expect(find.text('No Journal Entries Found'), findsOneWidget);
+    expect(find.byIcon(Icons.book_outlined), findsOneWidget);
+  });
+
+  testWidgets('shows list of journals when filteredJournals has data', (WidgetTester tester) async {
+    final testUser = UserEntity(
+      userId: 'u1',
+      username: 'testuser',
+      email: 'test@example.com',
+      password: 'password',
+    );
+
+    final testTrek = TrekEntity(
+      id: 't1',
+      name: 'Test Trek',
+      location: 'Test Location',
+      description: 'Description',
+      imageUrl: '/image.jpg',
+      distance: 10,
+      difficulty: 'Easy',
+    );
+
+    final testJournal = JournalEntity(
+      id: 'j1',
+      userId: 'u1',
+      trekId: 't1',
+      date: DateTime.now().toIso8601String(),
+      text: 'This is a test journal entry.',
+      photos: ['/photos/photo1.jpg', '/photos/photo2.jpg'],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      user: testUser,
+      trek: testTrek,
+    );
+
+    when(() => mockViewModel.isLoading).thenReturn(false);
+    when(() => mockViewModel.error).thenReturn(null);
+    when(() => mockViewModel.filteredJournals).thenReturn([testJournal]);
+
+    await tester.pumpWidget(createWidgetUnderTest());
+    await tester.pumpAndSettle();
+
+    expect(find.text('This is a test journal entry.'), findsOneWidget);
+    expect(find.text('testuser'), findsOneWidget);
+    expect(find.text('Test Trek'), findsOneWidget);
+  });
 }
