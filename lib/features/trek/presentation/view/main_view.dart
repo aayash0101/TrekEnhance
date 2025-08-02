@@ -112,7 +112,7 @@ class _MainViewState extends State<MainView> {
         type: BottomNavigationBarType.fixed, // Add this to show all 4 tabs
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Colors.green[800],
+        selectedItemColor: Color.fromARGB(255, 16, 10, 141),
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
