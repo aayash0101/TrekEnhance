@@ -74,4 +74,15 @@ class UserRemoteRepository implements IUserRepository {
       return Left(RemoteDatabaseFailure(message: "Failed to update profile: $e"));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    try {
+      await remoteDataSource.logout();
+      return const Right(null);
+    } catch (e, stackTrace) {
+      print('❌ logout failed: $e\n$stackTrace');
+      return Left(RemoteDatabaseFailure(message: "Failed to logout: $e"));
+    }
+  }
 }

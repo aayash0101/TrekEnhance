@@ -19,10 +19,8 @@ class UserLocalDataSource implements IUserDataSource {
   Future<String> loginUser(String username, String password) async {
     final user = await hiveService.login(username, password);
     if (user != null) {
-      print('✅ User logged in locally: ${user.userId}');
       return "Login successful";
     } else {
-      print('⚠️ Invalid local login attempt for username: $username');
       throw Exception("Invalid username or password");
     }
   }
@@ -31,17 +29,14 @@ class UserLocalDataSource implements IUserDataSource {
   Future<UserEntity> getCurrentUser() async {
     final user = await hiveService.getCurrentUser();
     if (user != null) {
-      print('✅ Got current user from Hive: ${user.userId}');
       return user.toEntity();
     } else {
-      print('⚠️ No user found in Hive');
       throw Exception("No user logged in");
     }
   }
 
   @override
   Future<String> uploadProfilePicture(File file) {
-    // Local datasource does not support file uploads
     throw UnimplementedError('uploadProfilePicture is not supported locally');
   }
 
@@ -58,11 +53,14 @@ class UserLocalDataSource implements IUserDataSource {
       location: location,
     );
     if (updatedUser != null) {
-      print('✅ Updated user profile in Hive: ${updatedUser.userId}');
       return updatedUser.toEntity();
     } else {
-      print('⚠️ Failed to update user: user not found in Hive');
       throw Exception("Failed to update user: user not found");
     }
+  }
+
+  @override
+  Future<void> logout() async {
+    await hiveService.clearUserData();
   }
 }

@@ -37,8 +37,7 @@ class HiveService {
     print('DEBUG: Registered user in Hive with userId: ${user.userId}');
   }
 
-  /// Find a user locally by username and password.  
-  /// Note: This is local only, not backend verification.
+  /// Find a user locally by username and password.
   Future<UserHiveModel?> login(String username, String password) async {
     print('DEBUG: Attempting login with username: $username');
     try {
@@ -53,8 +52,7 @@ class HiveService {
     }
   }
 
-  /// Returns the first user found in the box.  
-  /// Note: This may need to be adapted if you have multiple users locally.
+  /// Returns the first user found in the box.
   Future<UserHiveModel?> getCurrentUser() async {
     if (_userBox.isNotEmpty) {
       final user = _userBox.values.first;
@@ -107,6 +105,12 @@ class HiveService {
     await _userBox.clear();
     await Hive.deleteBoxFromDisk(HiveTableConstant.userBox);
     print('DEBUG: Cleared all users and deleted box from disk');
+  }
+
+  /// Clears user data only, useful for logout (does NOT delete box)
+  Future<void> clearUserData() async {
+    await _userBox.clear();
+    print('DEBUG: Cleared all user data from user box');
   }
 
   /// Closes the Hive box and Hive itself.

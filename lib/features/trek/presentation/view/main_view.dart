@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shake/shake.dart';
 import 'package:flutter_application_trek_e/features/home/presentation/view/home_view.dart';
 import 'package:flutter_application_trek_e/features/journal/presentation/view/journal_view.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view/user_profile_view.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_logout_usecase.dart';
 import 'package:flutter_application_trek_e/features/trek/presentation/view/review_view.dart';
 
 class MainView extends StatefulWidget {
@@ -17,8 +19,8 @@ class _MainViewState extends State<MainView> {
   int _selectedIndex = 0;
   String? _userId;
   bool _isLoading = true;
-
   late List<Widget> _pages;
+  late ShakeDetector _shakeDetector;
 
   @override
   void initState() {
@@ -26,16 +28,26 @@ class _MainViewState extends State<MainView> {
     _pages = [
       const HomeView(),
       const JournalView(),
-      const ReviewView(), // use default constructor, BlocProvider handles usecase inside
-      const SizedBox(), // placeholder, will replace with UserProfileView when userId loads
+      const ReviewView(),
+      const SizedBox(), // placeholder for UserProfileView
     ];
     _fetchCurrentUserId();
+    
+    // Initialize shake detector with synchronous callback
+    _shakeDetector = ShakeDetector.autoStart(
+      onPhoneShake: _handleShakeLogout,
+    );
+  }
+
+  @override
+  void dispose() {
+    _shakeDetector.stopListening();
+    super.dispose();
   }
 
   Future<void> _fetchCurrentUserId() async {
     final userGetCurrentUsecase = serviceLocator<UserGetCurrentUsecase>();
     final result = await userGetCurrentUsecase();
-
     result.fold(
       (failure) {
         setState(() {
@@ -47,8 +59,6 @@ class _MainViewState extends State<MainView> {
         setState(() {
           _userId = userEntity.userId;
           _isLoading = false;
-
-          // Now this works because _pages is mutable
           _pages[_pages.length - 1] = UserProfileView(userId: _userId!);
         });
       },
@@ -61,47 +71,54 @@ class _MainViewState extends State<MainView> {
     });
   }
 
+  // Synchronous shake handler that accepts ShakeEvent parameter
+  void _handleShakeLogout(ShakeEvent event) {
+    _performLogout(); // Fire-and-forget async call
+  }
+
+  Future<void> _performLogout() async {
+    final logoutUsecase = serviceLocator<UserLogoutUsecase>();
+    try {
+      await logoutUsecase();
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/login', // Adjust the route name to your login screen
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      print('Logout failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logout failed, try again')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (_userId == null) {
-      return const Scaffold(
-        body: Center(child: Text('Failed to load user')),
-      );
+      return const Scaffold(body: Center(child: Text('Failed to load user')));
     }
 
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, // Add this to show all 4 tabs
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Colors.green[800],
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Journals',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.reviews),
-            label: 'Reviews',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Journals'),
+          BottomNavigationBarItem(icon: Icon(Icons.reviews), label: 'Reviews'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

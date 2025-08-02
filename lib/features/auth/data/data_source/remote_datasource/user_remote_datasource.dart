@@ -13,86 +13,56 @@ class UserRemoteDataSource implements IUserDataSource {
 
   UserRemoteDataSource({required this.apiService, required this.hiveService});
 
-  /// Login user with username and password, save token and user to Hive locally.
   @override
   Future<String> loginUser(String username, String password) async {
     try {
-      print('🔑 Starting loginUser for username: $username');
-
       final response = await apiService.dio.post(
         '${ApiEndpoints.userBaseUrl}${ApiEndpoints.login}',
         data: {'username': username, 'password': password},
       );
 
-      print('✔ Login API raw response data: ${response.data}');
-
       if (response.statusCode == 200) {
         final token = response.data['token'];
         final userJson = response.data['user'];
 
-        print('✔ Parsed userJson before mapping: $userJson');
-
-        // Map 'id' → '_id' for consistency with Hive model
         if (userJson != null && userJson['id'] != null) {
           userJson['_id'] = userJson['id'];
         }
 
         final userApiModel = UserApiModel.fromJson(userJson);
-        print(
-          '✔ userApiModel.userId (parsed from _id): ${userApiModel.userId}',
-        );
 
         if (userApiModel.userId == null) {
-          throw Exception(
-            '❌ User ID missing in API response; cannot save to Hive.',
-          );
+          throw Exception('User ID missing in API response.');
         }
 
         final hiveModel = userApiModel.toHiveModel();
-        print('📦 About to save to Hive with userId: ${hiveModel.userId}');
-
         await hiveService.register(hiveModel);
 
-        print(
-          '✅ Successfully saved user to Hive with userId: ${hiveModel.userId}',
-        );
         return token;
       } else {
-        print(
-          '❌ Login failed: statusCode=${response.statusCode}, message=${response.statusMessage}',
-        );
         throw Exception('Login failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      print('⚠️ Dio error during login: ${e.message}');
-      if (e.response != null) {
-        print('⚠️ Dio error response data: ${e.response?.data}');
-      }
       throw Exception('Failed to login: ${e.message}');
     }
   }
 
-  /// Register a new user via API.
   @override
   Future<void> registerUser(UserEntity userData) async {
     try {
       final userApiModel = UserApiModel.fromEntity(userData);
-
       final response = await apiService.dio.post(
         '${ApiEndpoints.userBaseUrl}${ApiEndpoints.register}',
         data: userApiModel.toJson(),
       );
-
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception('Registration failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      print('⚠️ Dio error during register: ${e.message}');
       throw Exception('Failed to register: ${e.message}');
     }
   }
 
-  /// Upload user profile picture file to server.
   @override
   Future<String> uploadProfilePicture(File file) async {
     try {
@@ -115,30 +85,18 @@ class UserRemoteDataSource implements IUserDataSource {
         throw Exception('Upload failed: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      print('⚠️ Dio error during upload: ${e.message}');
       throw Exception('Failed to upload picture: ${e.message}');
     }
   }
 
-  /// Fetch current user profile from backend using userId stored in Hive.
   @override
   Future<UserEntity> getCurrentUser() async {
     try {
-      print('👀 Starting getCurrentUser...');
       final userId = await hiveService.getUserId();
-      print('📌 getUserId() returned: $userId');
+      if (userId == null) throw Exception('User ID not found');
 
-      if (userId == null) throw Exception('User ID not found in Hive');
-
-      final url =
-          ApiEndpoints.userBaseUrl + ApiEndpoints.getProfileById(userId);
-      print('🌍 Making API call to: $url');
-
+      final url = ApiEndpoints.userBaseUrl + ApiEndpoints.getProfileById(userId);
       final response = await apiService.dio.get(url);
-
-      print(
-        '📦 API response status: ${response.statusCode}, data: ${response.data}',
-      );
 
       if (response.statusCode == 200) {
         final userJson = response.data['data'] ?? response.data;
@@ -148,25 +106,15 @@ class UserRemoteDataSource implements IUserDataSource {
         }
 
         final userApiModel = UserApiModel.fromJson(userJson);
-        print(
-          '✅ Successfully mapped API response to UserApiModel with userId: ${userApiModel.userId}',
-        );
-
         return userApiModel.toEntity();
       } else {
-        print('❌ Failed to fetch user: ${response.statusMessage}');
         throw Exception('Failed to fetch user: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      print('⚠️ Dio error during getCurrentUser: ${e.message}');
-      if (e.response != null) {
-        print('⚠️ Dio error response data: ${e.response?.data}');
-      }
       throw Exception('Failed to get user: ${e.message}');
     }
   }
 
-  /// Update current user's profile on backend.
   @override
   Future<UserEntity> updateUserProfile({
     required String username,
@@ -176,9 +124,7 @@ class UserRemoteDataSource implements IUserDataSource {
   }) async {
     try {
       final userId = await hiveService.getUserId();
-      if (userId == null) throw Exception('User ID not found in Hive');
-
-      print('📌 Updating userId from Hive: $userId');
+      if (userId == null) throw Exception('User ID not found');
 
       final response = await apiService.dio.put(
         '${ApiEndpoints.userBaseUrl}${ApiEndpoints.updateProfileById(userId)}',
@@ -197,8 +143,17 @@ class UserRemoteDataSource implements IUserDataSource {
         throw Exception('Failed to update profile: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      print('⚠️ Dio error during updateUserProfile: ${e.message}');
       throw Exception('Failed to update profile: ${e.message}');
     }
   }
+
+ @override
+Future<void> logout() async {
+  try {
+    // No backend logout call, just clear local stored data
+    await hiveService.clearUserData();
+  } catch (e) {
+    throw Exception('Logout failed: $e');
+  }
+}
 }

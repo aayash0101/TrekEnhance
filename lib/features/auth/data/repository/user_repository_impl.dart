@@ -19,7 +19,7 @@ class UserRepositoryImpl implements IUserRepository {
     try {
       await remoteDataSource.registerUser(user);
       try {
-        await localDataSource.registerUser(user); // optionally cache locally
+        await localDataSource.registerUser(user); // Cache locally
       } catch (_) {
         // Ignore local cache failure
       }
@@ -55,12 +55,11 @@ class UserRepositoryImpl implements IUserRepository {
       final user = await localDataSource.getCurrentUser();
       return Right(user);
     } catch (_) {
-      // local cache failed, fallback to remote
+      // fallback to remote
       try {
         final user = await remoteDataSource.getCurrentUser();
-        // optional: cache latest user
         try {
-          await localDataSource.registerUser(user);
+          await localDataSource.registerUser(user); // update cache
         } catch (_) {}
         return Right(user);
       } catch (e) {
@@ -84,11 +83,22 @@ class UserRepositoryImpl implements IUserRepository {
         profileImageUrl: profileImageUrl,
       );
       try {
-        await localDataSource.registerUser(updatedUser); // update local cache
+        await localDataSource.registerUser(updatedUser); // update cache
       } catch (_) {}
       return Right(updatedUser);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    try {
+      // Clear local storage/session
+      await localDataSource.logout();
+      return const Right(null);
+    } catch (e) {
+      return Left(LocalDatabaseFailure(message: e.toString()));
     }
   }
 }

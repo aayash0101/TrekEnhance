@@ -26,5 +26,5 @@ abstract interface class IUserRepository {
     String? location,
     String? profileImageUrl, 
   });
-  
+  Future<void> logout();
 }

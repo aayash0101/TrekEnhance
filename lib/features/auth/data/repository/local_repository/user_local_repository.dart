@@ -70,4 +70,14 @@ class UserLocalRepository implements IUserRepository {
       return Left(LocalDatabaseFailure(message: "Failed to update profile: $e"));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    try {
+      await _userLocalDatasource.logout();
+      return const Right(null);
+    } catch (e) {
+      return Left(LocalDatabaseFailure(message: "Failed to logout: $e"));
+    }
+  }
 }

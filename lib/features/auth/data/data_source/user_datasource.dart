@@ -21,4 +21,7 @@ abstract interface class IUserDataSource {
     String? location,
     String? profileImageUrl,
   });
+
+  /// Logout user (clear local session or call backend logout)
+  Future<void> logout();
 }
