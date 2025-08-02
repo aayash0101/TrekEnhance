@@ -9,16 +9,35 @@ import 'review_state.dart';
 class ReviewViewModel extends Bloc<ReviewEvent, ReviewState> {
   final GetAllTreksUsecase getAllTreksUsecase;
 
+  List<TrekEntity> _allTreks = [];
+
   ReviewViewModel({required this.getAllTreksUsecase}) : super(ReviewInitial()) {
-    on<LoadAllReviews>((event, emit) async {
-      emit(ReviewLoading());
+    on<LoadAllReviews>(_onLoadAllReviews);
+    on<SearchReviews>(_onSearchReviews);
+  }
 
-      final Either<Failure, List<TrekEntity>> result = await getAllTreksUsecase();
+  Future<void> _onLoadAllReviews(LoadAllReviews event, Emitter<ReviewState> emit) async {
+    emit(ReviewLoading());
+    final result = await getAllTreksUsecase();
 
-      result.fold(
-        (failure) => emit(ReviewError(failure.toString())),
-        (treks) => emit(ReviewLoaded(treks)),
-      );
-    });
+    result.fold(
+      (failure) => emit(ReviewError(failure.message)),
+      (treks) {
+        _allTreks = treks;
+        emit(ReviewLoaded(treks));
+      },
+    );
+  }
+
+  void _onSearchReviews(SearchReviews event, Emitter<ReviewState> emit) {
+    final query = event.query.toLowerCase();
+
+    final filtered = _allTreks.where((trek) =>
+      trek.name.toLowerCase().contains(query) ||
+      (trek.location?.toLowerCase() ?? '').contains(query)
+    ).toList();
+
+    emit(ReviewLoaded(filtered));
   }
 }
+

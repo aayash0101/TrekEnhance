@@ -8,3 +8,12 @@ abstract class ReviewEvent extends Equatable {
 }
 
 class LoadAllReviews extends ReviewEvent {}
+
+class SearchReviews extends ReviewEvent {
+  final String query;
+
+  const SearchReviews(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}

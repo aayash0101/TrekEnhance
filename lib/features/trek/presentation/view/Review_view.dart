@@ -21,7 +21,7 @@ class ReviewView extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
-    
+
     if (difference == 0) {
       return 'Today';
     } else if (difference == 1) {
@@ -37,147 +37,132 @@ class ReviewView extends StatelessWidget {
   }
 
   /// Helper to get star rating widget
-  Widget _buildStarRating(double rating) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (index) {
-        if (index < rating.floor()) {
-          return Icon(Icons.star, size: 16, color: Colors.amber[600]);
-        } else if (index < rating) {
-          return Icon(Icons.star_half, size: 16, color: Colors.amber[600]);
-        } else {
-          return Icon(Icons.star_border, size: 16, color: Colors.grey[400]);
-        }
-      }),
-    );
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => serviceLocator<ReviewViewModel>()..add(LoadAllReviews()),
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        appBar: AppBar(
-          title: const Text(
-            'Trek Reviews',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 24,
+@override
+Widget build(BuildContext context) {
+  return BlocProvider(
+    create: (_) => serviceLocator<ReviewViewModel>()..add(LoadAllReviews()),
+    child: Builder(
+      builder: (context) {
+        return Scaffold(
+          backgroundColor: Colors.grey[50],
+          appBar: AppBar(
+            title: const Text(
+              'Trek Reviews',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 24),
             ),
+            centerTitle: true,
+            backgroundColor: Colors.white,
+            foregroundColor: Colors.black87,
+            elevation: 0,
+            shadowColor: Colors.black12,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextField(
+                    decoration: const InputDecoration(
+                      hintText: 'Search trek reviews...',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      suffixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: (query) {
+                      context.read<ReviewViewModel>().add(SearchReviews(query));
+                    },
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  context.read<ReviewViewModel>().add(LoadAllReviews());
+                },
+              ),
+            ],
           ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          elevation: 0,
-          shadowColor: Colors.black12,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: () {
-                context.read<ReviewViewModel>().add(LoadAllReviews());
-              },
-            ),
-          ],
-        ),
-        body: BlocBuilder<ReviewViewModel, ReviewState>(
-          builder: (context, state) {
-            if (state is ReviewLoading) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).primaryColor,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading trek reviews...',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            } else if (state is ReviewError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red[300],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Oops! Something went wrong',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Error: ${state.message}',
-                      style: TextStyle(
-                        color: Colors.red[600],
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        context.read<ReviewViewModel>().add(LoadAllReviews());
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Try Again'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            } else if (state is ReviewLoaded) {
-              final treks = state.treks;
-              if (treks.isEmpty) {
+          body: BlocBuilder<ReviewViewModel, ReviewState>(
+            builder: (context, state) {
+              if (state is ReviewLoading) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.rate_review_outlined,
-                        size: 80,
-                        color: Colors.grey[400],
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).primaryColor,
+                        ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       Text(
-                        'No Trek Reviews Yet',
+                        'Loading trek reviews...',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (state is ReviewError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Oops! Something went wrong',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: Colors.grey[800],
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Be the first to share your trekking experience!',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
+                        'Error: ${state.message}',
+                        style: TextStyle(color: Colors.red[600], fontSize: 14),
                         textAlign: TextAlign.center,
                       ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          context.read<ReviewViewModel>().add(LoadAllReviews());
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try Again'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (state is ReviewLoaded) {
+                final treks = state.treks;
+                if (treks.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.rate_review_outlined, size: 80, color: Colors.grey[400]),
+                        const SizedBox(height: 24),
+                        Text(
+                          'No Trek Reviews Yet',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Colors.grey[800]),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Be the first to share your trekking experience!',
+                          style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                          textAlign: TextAlign.center,
+                        ),
                     ],
                   ),
                 );
@@ -193,7 +178,7 @@ class ReviewView extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final trek = treks[index];
                     final reviews = trek.reviews ?? [];
-                    
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 20),
                       decoration: BoxDecoration(
@@ -211,7 +196,8 @@ class ReviewView extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Trek Header with Image
-                          if (trek.imageUrl != null && trek.imageUrl!.isNotEmpty)
+                          if (trek.imageUrl != null &&
+                              trek.imageUrl!.isNotEmpty)
                             ClipRRect(
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(16),
@@ -227,43 +213,51 @@ class ReviewView extends StatelessWidget {
                                       height: 200,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
+                                      loadingBuilder: (
+                                        context,
+                                        child,
+                                        loadingProgress,
+                                      ) {
+                                        if (loadingProgress == null)
+                                          return child;
                                         return Container(
                                           height: 200,
                                           color: Colors.grey[200],
                                           child: Center(
                                             child: CircularProgressIndicator(
                                               strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                Colors.grey[400]!,
-                                              ),
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    Colors.grey[400]!,
+                                                  ),
                                             ),
                                           ),
                                         );
                                       },
-                                      errorBuilder: (_, __, ___) => Container(
-                                        height: 200,
-                                        color: Colors.grey[200],
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.landscape_outlined,
-                                              size: 48,
-                                              color: Colors.grey[400],
+                                      errorBuilder:
+                                          (_, __, ___) => Container(
+                                            height: 200,
+                                            color: Colors.grey[200],
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons.landscape_outlined,
+                                                  size: 48,
+                                                  color: Colors.grey[400],
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Text(
+                                                  'Image not available',
+                                                  style: TextStyle(
+                                                    color: Colors.grey[500],
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Image not available',
-                                              style: TextStyle(
-                                                color: Colors.grey[500],
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                          ),
                                     ),
                                     // Gradient overlay
                                     Positioned(
@@ -345,8 +339,8 @@ class ReviewView extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      reviews.isEmpty 
-                                          ? 'No Reviews Yet' 
+                                      reviews.isEmpty
+                                          ? 'No Reviews Yet'
                                           : '${reviews.length} Review${reviews.length > 1 ? 's' : ''}',
                                       style: TextStyle(
                                         fontSize: 16,
@@ -356,7 +350,7 @@ class ReviewView extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                
+
                                 if (reviews.isEmpty) ...[
                                   const SizedBox(height: 16),
                                   Container(
@@ -400,36 +394,46 @@ class ReviewView extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   ListView.separated(
                                     shrinkWrap: true,
-                                    physics: const NeverScrollableScrollPhysics(),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     itemCount: reviews.length,
-                                    separatorBuilder: (_, __) => Container(
-                                      margin: const EdgeInsets.symmetric(vertical: 12),
-                                      height: 1,
-                                      color: Colors.grey[200],
-                                    ),
+                                    separatorBuilder:
+                                        (_, __) => Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 12,
+                                          ),
+                                          height: 1,
+                                          color: Colors.grey[200],
+                                        ),
                                     itemBuilder: (context, reviewIndex) {
                                       final review = reviews[reviewIndex];
                                       return Container(
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
                                           color: Colors.grey[50],
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             // Reviewer Header
                                             Row(
                                               children: [
                                                 CircleAvatar(
                                                   radius: 20,
-                                                  backgroundColor: Colors.blue[100],
+                                                  backgroundColor:
+                                                      Colors.blue[100],
                                                   child: Text(
                                                     review.username.isNotEmpty
-                                                        ? review.username[0].toUpperCase()
+                                                        ? review.username[0]
+                                                            .toUpperCase()
                                                         : '?',
                                                     style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                       color: Colors.blue[700],
                                                     ),
                                                   ),
@@ -437,20 +441,26 @@ class ReviewView extends StatelessWidget {
                                                 const SizedBox(width: 12),
                                                 Expanded(
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         review.username,
                                                         style: const TextStyle(
-                                                          fontWeight: FontWeight.w600,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                           fontSize: 15,
                                                         ),
                                                       ),
                                                       Text(
-                                                        _formatDate(review.date),
+                                                        _formatDate(
+                                                          review.date,
+                                                        ),
                                                         style: TextStyle(
                                                           fontSize: 12,
-                                                          color: Colors.grey[600],
+                                                          color:
+                                                              Colors.grey[600],
                                                         ),
                                                       ),
                                                     ],
@@ -490,11 +500,7 @@ class ReviewView extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.hiking,
-                      size: 80,
-                      color: Colors.grey[400],
-                    ),
+                    Icon(Icons.hiking, size: 80, color: Colors.grey[400]),
                     const SizedBox(height: 24),
                     Text(
                       'Welcome to Trek Reviews',
@@ -507,10 +513,7 @@ class ReviewView extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Discover what fellow trekkers have to say',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -519,7 +522,9 @@ class ReviewView extends StatelessWidget {
             }
           },
         ),
-      ),
+      );
+      },
+    )
     );
   }
 }
