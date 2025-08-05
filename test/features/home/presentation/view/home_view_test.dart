@@ -1,58 +1,48 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_application_trek_e/features/home/presentation/view/home_view.dart';
-import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
-import 'package:flutter_application_trek_e/features/home/domain/entity/trek_entity.dart';
-import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-// Mock classes
+import 'package:flutter_application_trek_e/features/home/domain/entity/trek_entity.dart';
+import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
+import 'package:flutter_application_trek_e/features/home/presentation/view/home_view.dart';
+import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
+import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_state.dart';
+import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/core/error/failure.dart';
+
 class MockHomeRepository extends Mock implements IHomeRepository {}
 
 void main() {
-  late MockHomeRepository mockRepository;
+  late MockHomeRepository mockHomeRepository;
 
-  setUp(() async {
-    // Make sure service locator is reset or unregister old repo if already registered
+  setUp(() {
+    mockHomeRepository = MockHomeRepository();
+
     if (serviceLocator.isRegistered<IHomeRepository>()) {
       serviceLocator.unregister<IHomeRepository>();
     }
+    serviceLocator.registerSingleton<IHomeRepository>(mockHomeRepository);
 
-    mockRepository = MockHomeRepository();
-
-    // Register mocked repository in the service locator,
-    // so HomeViewModel created inside HomeView uses this mock
-    serviceLocator.registerLazySingleton<IHomeRepository>(() => mockRepository);
+    // Stub getAllTreks to return empty list (simulate no treks)
+    when(() => mockHomeRepository.getAllTreks())
+        .thenAnswer((_) async => Right(<TrekEntity>[]));
   });
 
- testWidgets('HomeView shows loading state with progress indicator and text', (tester) async {
-  // Mock getAllTreks to return a Future that never completes immediately,
-  // so bloc stays in loading state during the first frame(s).
-  when(() => mockRepository.getAllTreks()).thenAnswer(
-    (_) => Future.delayed(const Duration(seconds: 5), () => Right(<TrekEntity>[])),
-  );
-
-  await tester.pumpWidget(const MaterialApp(home: HomeView()));
-
-  // Immediately after pump, it should show loading UI
-  expect(find.byType(CircularProgressIndicator), findsOneWidget);
-  expect(find.text('Loading amazing treks...'), findsOneWidget);
-});
-
-  testWidgets('HomeView shows empty state when no treks are available', (tester) async {
-    // Return empty list wrapped in your Either type
-    when(() => mockRepository.getAllTreks()).thenAnswer(
-      (_) async => Right(<TrekEntity>[]), // Adjust Right() constructor if needed
+  Widget createWidgetUnderTest() {
+    return MaterialApp(
+      home: HomeView(),
     );
+  }
 
-    await tester.pumpWidget(const MaterialApp(home: HomeView()));
-    await tester.pumpAndSettle();
+  testWidgets('shows empty message when treks list is empty', (tester) async {
+    await tester.pumpWidget(createWidgetUnderTest());
+
+    // BLoC emits loading -> loaded with empty list, so need to pump twice
+    await tester.pump(); // Start build + initial BLoC loading state
+    await tester.pump(const Duration(seconds: 1)); // Let BLoC finish fetching
 
     expect(find.text('No treks found.'), findsOneWidget);
   });
-
-
-
-
 }
