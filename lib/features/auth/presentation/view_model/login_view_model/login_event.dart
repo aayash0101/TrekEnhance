@@ -9,12 +9,6 @@ class NavigateToRegisterViewEvent extends LoginEvent {
   NavigateToRegisterViewEvent({required this.context});
 }
 
-class NavigateToHomeViewEvent extends LoginEvent {
-  final BuildContext context;
-
-  NavigateToHomeViewEvent({required this.context});
-}
-
 class LoginWithEmailAndPasswordEvent extends LoginEvent {
   final BuildContext context;
   final String username;

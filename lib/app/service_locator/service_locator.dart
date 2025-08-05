@@ -1,6 +1,18 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
+import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_logout_usecase.dart';
 import 'package:flutter_application_trek_e/features/home/data/data_source/local_datasource/home_local_datasource.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/add_favorite_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/add_saved_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_favorite_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_journal_with_status_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_saved_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/is_journal_favorite_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/is_journal_saved_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/remove_favorite_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/remove_saved_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/toggle_favorite_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/toggle_saved_journal_usecase.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -113,13 +125,19 @@ void _initAuthModule() {
     () => UserLoginUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
   serviceLocator.registerFactory(
-    () => UserRegisterUsecase(userRepository: serviceLocator<IUserRepository>()),
+    () =>
+        UserRegisterUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
   serviceLocator.registerFactory(
     () => UploadImageUsecase(userRepository: serviceLocator<IUserRepository>()),
   );
   serviceLocator.registerFactory(
-    () => UserGetCurrentUsecase(userRepository: serviceLocator<IUserRepository>()),
+    () => UserGetCurrentUsecase(
+      userRepository: serviceLocator<IUserRepository>(),
+    ),
+  );
+  serviceLocator.registerFactory(
+    () => UserLogoutUsecase(serviceLocator<IUserRepository>()),
   );
 
   // ViewModels
@@ -174,58 +192,72 @@ void _initHomeModule() {
 }
 
 void _initJournalModule() {
-  // Data sources
-  serviceLocator.registerLazySingleton<JournalLocalDataSource>(
-    () => JournalLocalDataSource(hiveService: serviceLocator<HiveService>()),
-  );
-
-  serviceLocator.registerLazySingleton<JournalRemoteDataSource>(
-    () => JournalRemoteDataSource(dio: serviceLocator<Dio>()),
-  );
-
-  // Repository
+  serviceLocator.registerLazySingleton(() => JournalLocalDataSource(hiveService: serviceLocator()));
+  serviceLocator.registerLazySingleton(() => JournalRemoteDataSource(dio: serviceLocator()));
   serviceLocator.registerLazySingleton<IJournalRepository>(
     () => JournalRepositoryImpl(
-      remoteDataSource: serviceLocator<JournalRemoteDataSource>(),
-      localDataSource: serviceLocator<JournalLocalDataSource>(),
+      remoteDataSource: serviceLocator(),
+      localDataSource: serviceLocator(),
     ),
   );
 
-  // Use cases
-  serviceLocator.registerFactory(
-    () => CreateJournalUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => GetAllJournalsUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => GetJournalsByTrekAndUserUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => GetJournalsByUserUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => UpdateJournalUsecase(serviceLocator<IJournalRepository>()),
-  );
-  serviceLocator.registerFactory(
-    () => DeleteJournalUsecase(serviceLocator<IJournalRepository>()),
-  );
+  // Basic CRUD
+  serviceLocator.registerFactory(() => CreateJournalUsecase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetAllJournalsUsecase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetJournalsByTrekAndUserUsecase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetJournalsByUserUsecase(serviceLocator()));
+  serviceLocator.registerFactory(() => UpdateJournalUsecase(serviceLocator()));
+  serviceLocator.registerFactory(() => DeleteJournalUsecase(serviceLocator()));
+
+  // Save / Unsave
+  serviceLocator.registerFactory(() => SaveJournalUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => UnsaveJournalUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => IsJournalSavedUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetSavedJournalsUseCase(serviceLocator()));
+
+  // Favorite / Unfavorite
+  serviceLocator.registerFactory(() => FavoriteJournalUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => UnfavoriteJournalUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => IsJournalFavoritedUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetFavoriteJournalsUseCase(serviceLocator()));
+
+  // Toggle
+  serviceLocator.registerFactory(() => ToggleSaveJournalUseCase(
+    saveJournalUseCase: serviceLocator(),
+    unsaveJournalUseCase: serviceLocator(),
+    isJournalSavedUseCase: serviceLocator(),
+  ));
+  serviceLocator.registerFactory(() => ToggleFavoriteJournalUseCase(
+    favoriteJournalUseCase: serviceLocator(),
+    unfavoriteJournalUseCase: serviceLocator(),
+    isJournalFavoritedUseCase: serviceLocator(),
+  ));
+
+  // Additional
+  serviceLocator.registerFactory(() => GetJournalsWithStatusUseCase(serviceLocator()));
 
   // ViewModel
-  serviceLocator.registerFactory(
-    () => JournalViewModel(
-      createJournalUsecase: serviceLocator<CreateJournalUsecase>(),
-      getAllJournalsUsecase: serviceLocator<GetAllJournalsUsecase>(),
-      getJournalsByTrekAndUserUsecase: serviceLocator<GetJournalsByTrekAndUserUsecase>(),
-      getJournalsByUserUsecase: serviceLocator<GetJournalsByUserUsecase>(),
-      updateJournalUsecase: serviceLocator<UpdateJournalUsecase>(),
-      deleteJournalUsecase: serviceLocator<DeleteJournalUsecase>(),
-    ),
-  );
+  serviceLocator.registerFactory(() => JournalViewModel(
+    createJournalUsecase: serviceLocator(),
+    getAllJournalsUsecase: serviceLocator(),
+    getJournalsByTrekAndUserUsecase: serviceLocator(),
+    getJournalsByUserUsecase: serviceLocator(),
+    updateJournalUsecase: serviceLocator(),
+    deleteJournalUsecase: serviceLocator(),
+    getSavedJournalsUseCase: serviceLocator(),
+    saveJournalUseCase: serviceLocator(),
+    unsaveJournalUseCase: serviceLocator(),
+    isJournalSavedUseCase: serviceLocator(),
+    getFavoriteJournalsUseCase: serviceLocator(),
+    favoriteJournalUseCase: serviceLocator(),
+    unfavoriteJournalUseCase: serviceLocator(),
+    isJournalFavoritedUseCase: serviceLocator(),
+    toggleSaveJournalUseCase: serviceLocator(),
+    toggleFavoriteJournalUseCase: serviceLocator(),
+    getJournalsWithStatusUseCase: serviceLocator(),
+  ));
 }
 
 void _initSplashModule() {
-  serviceLocator.registerFactory(
-    () => SplashViewModel(tokenSharedPrefs: serviceLocator<TokenSharedPrefs>()),
-  );
+  serviceLocator.registerFactory(() => SplashViewModel(tokenSharedPrefs: serviceLocator()));
 }

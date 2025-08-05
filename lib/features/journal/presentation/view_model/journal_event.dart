@@ -1,48 +1,40 @@
 import 'package:equatable/equatable.dart';
 
 abstract class JournalEvent extends Equatable {
-  const JournalEvent();
-
   @override
   List<Object?> get props => [];
 }
 
-/// Fetch all journals (public feed)
-class FetchAllJournalsEvent extends JournalEvent {}
-
-/// Fetch journals by trekId & userId
-class FetchJournalsByTrekAndUserEvent extends JournalEvent {
-  final String trekId;
+class FetchAllJournals extends JournalEvent {
   final String userId;
-
-  const FetchJournalsByTrekAndUserEvent({
-    required this.trekId,
-    required this.userId,
-  });
-
-  @override
-  List<Object?> get props => [trekId, userId];
-}
-
-/// Fetch journals by userId only
-class FetchJournalsByUserEvent extends JournalEvent {
-  final String userId;
-
-  const FetchJournalsByUserEvent({required this.userId});
+  FetchAllJournals(this.userId);
 
   @override
   List<Object?> get props => [userId];
 }
 
-/// Create new journal
-class CreateJournalEvent extends JournalEvent {
+class FetchJournalsByUser extends JournalEvent {
   final String userId;
+  FetchJournalsByUser(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}
+
+class FetchJournalsByTrekAndUser extends JournalEvent {
   final String trekId;
-  final String date;
-  final String text;
+  final String userId;
+  FetchJournalsByTrekAndUser({required this.trekId, required this.userId});
+
+  @override
+  List<Object?> get props => [trekId, userId];
+}
+
+class CreateJournal extends JournalEvent {
+  final String userId, trekId, date, text;
   final List<String> photos;
 
-  const CreateJournalEvent({
+  CreateJournal({
     required this.userId,
     required this.trekId,
     required this.date,
@@ -54,14 +46,11 @@ class CreateJournalEvent extends JournalEvent {
   List<Object?> get props => [userId, trekId, date, text, photos];
 }
 
-/// Update existing journal
-class UpdateJournalEvent extends JournalEvent {
-  final String id;
-  final String date;
-  final String text;
+class UpdateJournal extends JournalEvent {
+  final String id, date, text;
   final List<String> photos;
 
-  const UpdateJournalEvent({
+  UpdateJournal({
     required this.id,
     required this.date,
     required this.text,
@@ -72,12 +61,42 @@ class UpdateJournalEvent extends JournalEvent {
   List<Object?> get props => [id, date, text, photos];
 }
 
-/// Delete journal
-class DeleteJournalEvent extends JournalEvent {
+class DeleteJournal extends JournalEvent {
   final String id;
 
-  const DeleteJournalEvent({required this.id});
+  DeleteJournal(this.id);
 
   @override
   List<Object?> get props => [id];
 }
+
+class ToggleSaveJournal extends JournalEvent {
+  final String journalId;
+  final String userId;
+
+  ToggleSaveJournal({required this.journalId, required this.userId});
+
+  @override
+  List<Object?> get props => [journalId, userId];
+}
+
+class ToggleFavoriteJournal extends JournalEvent {
+  final String journalId;
+  final String userId;
+
+  ToggleFavoriteJournal({required this.journalId, required this.userId});
+
+  @override
+  List<Object?> get props => [journalId, userId];
+}
+
+class FilterJournals extends JournalEvent {
+  final String query;
+
+  FilterJournals(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
+
+class ClearError extends JournalEvent {}

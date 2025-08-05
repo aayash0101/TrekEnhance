@@ -34,7 +34,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       const ReviewView(),
       const SizedBox(), // placeholder for UserProfileView
     ];
-    _fetchCurrentUserId();
+    _fetchuserId();
     
     // Initialize FAB animation controller
     _fabAnimationController = AnimationController(
@@ -109,7 +109,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> _fetchCurrentUserId() async {
+  Future<void> _fetchuserId() async {
     final userGetCurrentUsecase = serviceLocator<UserGetCurrentUsecase>();
     final result = await userGetCurrentUsecase();
     result.fold(

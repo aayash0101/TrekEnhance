@@ -6,11 +6,9 @@ import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_lo
 import 'package:flutter_application_trek_e/features/auth/presentation/view/register_view.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/login_view_model/login_event.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/login_view_model/login_state.dart';
+import 'package:flutter_application_trek_e/features/trek/presentation/view/main_view.dart';
 import 'package:flutter_application_trek_e/features/auth/presentation/view_model/register_view_model/register_view_model.dart';
-import 'package:flutter_application_trek_e/features/home/presentation/view/home_view.dart';
-import 'package:flutter_application_trek_e/features/home/presentation/view_model/home_view_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 
 class LoginViewModel extends Bloc<LoginEvent, LoginState> {
   final UserLoginUsecase _userLoginUsecase;
@@ -19,7 +17,6 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
   LoginViewModel(this._userLoginUsecase, this._tokenSharedPrefs)
       : super(LoginState.initial()) {
     on<NavigateToRegisterViewEvent>(_onNavigateToRegisterView);
-    on<NavigateToHomeViewEvent>(_onNavigateToHomeView);
     on<LoginWithEmailAndPasswordEvent>(_onLoginWithEmailAndPassword);
   }
 
@@ -34,23 +31,6 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
           builder: (_) => BlocProvider(
             create: (_) => serviceLocator<RegisterViewModel>(),
             child: const RegisterView(),
-          ),
-        ),
-      );
-    }
-  }
-
-  void _onNavigateToHomeView(
-    NavigateToHomeViewEvent event,
-    Emitter<LoginState> emit,
-  ) {
-    if (event.context.mounted) {
-      Navigator.pushReplacement(
-        event.context,
-        MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => serviceLocator<HomeViewModel>(),
-            child: const HomeView(),
           ),
         ),
       );
@@ -77,11 +57,9 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
         );
       },
       (token) async {
-        // Save token to SharedPreferences
         final saveResult = await _tokenSharedPrefs.saveToken(token);
         saveResult.fold(
           (saveFailure) {
-            // If saving token fails, optionally show an error
             showMySnackBar(
               context: event.context,
               message: 'Failed to save token: ${saveFailure.message}',
@@ -90,7 +68,13 @@ class LoginViewModel extends Bloc<LoginEvent, LoginState> {
           },
           (_) {
             emit(state.copyWith(isLoading: false, isSuccess: true));
-            add(NavigateToHomeViewEvent(context: event.context));
+            // ✅ Navigate directly to MainView with bottom navigation
+            if (event.context.mounted) {
+              Navigator.of(event.context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const MainView()),
+                (route) => false,
+              );
+            }
           },
         );
       },

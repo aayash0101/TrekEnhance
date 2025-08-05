@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
+import 'package:flutter_application_trek_e/core/utils/utils.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/use_case/user_get_current_usecase.dart';
 import 'package:flutter_application_trek_e/features/home/domain/entity/trek_entity.dart';
@@ -14,7 +16,8 @@ class TrekDetailView extends StatefulWidget {
   State<TrekDetailView> createState() => _TrekDetailViewState();
 }
 
-class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStateMixin {
+class _TrekDetailViewState extends State<TrekDetailView>
+    with TickerProviderStateMixin {
   late AnimationController _fadeAnimationController;
   late Animation<double> _fadeAnimation;
   bool _isLoading = false;
@@ -27,7 +30,10 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
       vsync: this,
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeAnimationController, curve: Curves.easeInOut),
+      CurvedAnimation(
+        parent: _fadeAnimationController,
+        curve: Curves.easeInOut,
+      ),
     );
     _fadeAnimationController.forward();
   }
@@ -38,9 +44,10 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
     super.dispose();
   }
 
-  String fixImageUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    return 'http://10.0.2.2:5000$url'; // same logic as before
+  String _getFullImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return '${ApiEndpoints.serverAddress}$imageUrl';
   }
 
   String _getDifficultyColor(String? difficulty) {
@@ -110,7 +117,11 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                         content: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.favorite, color: Colors.white, size: 20),
+                            const Icon(
+                              Icons.favorite,
+                              color: Colors.white,
+                              size: 20,
+                            ),
                             const SizedBox(width: 12),
                             Flexible(
                               child: Text(
@@ -136,9 +147,10 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (widget.trek.imageUrl != null && widget.trek.imageUrl!.isNotEmpty)
+                  if (widget.trek.imageUrl != null &&
+                      widget.trek.imageUrl!.isNotEmpty)
                     Image.network(
-                      fixImageUrl(widget.trek.imageUrl),
+                      _getFullImageUrl(widget.trek.imageUrl),
                       fit: BoxFit.cover,
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
@@ -146,7 +158,9 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                           color: Colors.grey[200],
                           child: Center(
                             child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.teal[600]!),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.teal[600]!,
+                              ),
                             ),
                           ),
                         );
@@ -157,10 +171,7 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.teal[400]!,
-                                Colors.teal[600]!,
-                              ],
+                              colors: [Colors.teal[400]!, Colors.teal[600]!],
                             ),
                           ),
                           child: Center(
@@ -174,7 +185,9 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                                 ),
                                 const SizedBox(height: 16),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                  ),
                                   child: Text(
                                     widget.trek.name,
                                     style: const TextStyle(
@@ -199,10 +212,7 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.teal[400]!,
-                            Colors.teal[600]!,
-                          ],
+                          colors: [Colors.teal[400]!, Colors.teal[600]!],
                         ),
                       ),
                       child: Center(
@@ -216,7 +226,9 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                             ),
                             const SizedBox(height: 16),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
                               child: Text(
                                 widget.trek.name,
                                 style: const TextStyle(
@@ -287,11 +299,13 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
                         const SizedBox(height: 32),
 
                         // Description Section
-                        if (widget.trek.smallDescription != null || widget.trek.description != null)
+                        if (widget.trek.smallDescription != null ||
+                            widget.trek.description != null)
                           _buildDescriptionSection(),
 
                         // Highlights Section
-                        if (widget.trek.highlights != null && widget.trek.highlights!.isNotEmpty)
+                        if (widget.trek.highlights != null &&
+                            widget.trek.highlights!.isNotEmpty)
                           _buildHighlightsSection(),
 
                         const SizedBox(height: 40),
@@ -370,7 +384,7 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
             final screenWidth = constraints.maxWidth;
             final crossAxisCount = screenWidth < 300 ? 1 : 2;
             final childAspectRatio = screenWidth < 300 ? 2.5 : 1.5;
-            
+
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -518,38 +532,39 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: widget.trek.highlights!.map((highlight) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.teal[600],
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        highlight,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Colors.black87,
-                          height: 1.5,
+            children:
+                widget.trek.highlights!.map((highlight) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 6),
+                          width: 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Colors.teal[600],
+                            shape: BoxShape.circle,
+                          ),
                         ),
-                        softWrap: true,
-                        overflow: TextOverflow.visible,
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            highlight,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.black87,
+                              height: 1.5,
+                            ),
+                            softWrap: true,
+                            overflow: TextOverflow.visible,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
         ),
       ],
@@ -564,73 +579,81 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
           width: double.infinity,
           height: 56,
           child: ElevatedButton.icon(
-            icon: _isLoading 
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : const Icon(Icons.book_outlined),
+            icon:
+                _isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                    : const Icon(Icons.book_outlined),
             label: Text(
               _isLoading ? 'Loading...' : 'Create Journal Entry',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
-            onPressed: _isLoading ? null : () async {
-              setState(() => _isLoading = true);
-              
-              final userGetCurrentUsecase = serviceLocator<UserGetCurrentUsecase>();
-              final createJournalUsecase = serviceLocator<CreateJournalUsecase>();
-              final result = await userGetCurrentUsecase.call();
-              
-              setState(() => _isLoading = false);
-              
-              result.fold(
-                (failure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                          const SizedBox(width: 12),
-                          const Flexible(
-                            child: Text(
-                              'Failed to get current user. Please login.',
-                              overflow: TextOverflow.ellipsis,
+            onPressed:
+                _isLoading
+                    ? null
+                    : () async {
+                      setState(() => _isLoading = true);
+
+                      final userGetCurrentUsecase =
+                          serviceLocator<UserGetCurrentUsecase>();
+                      final createJournalUsecase =
+                          serviceLocator<CreateJournalUsecase>();
+                      final result = await userGetCurrentUsecase.call();
+
+                      setState(() => _isLoading = false);
+
+                      result.fold(
+                        (failure) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.error_outline,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Flexible(
+                                    child: Text(
+                                      'Failed to get current user. Please login.',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              backgroundColor: Colors.red[600],
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(16),
                             ),
-                          ),
-                        ],
-                      ),
-                      backgroundColor: Colors.red[600],
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      margin: const EdgeInsets.all(16),
-                    ),
-                  );
-                },
-                (currentUser) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => AddJournalView(
-                        trekId: widget.trek.id ?? '',
-                        userId: currentUser.userId ?? '',
-                        createJournalUsecase: createJournalUsecase,
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
+                          );
+                        },
+                        (currentUser) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => AddJournalView(
+                                    trekId: widget.trek.id ?? '',
+                                    userId: currentUser.userId ?? '',
+                                    createJournalUsecase: createJournalUsecase,
+                                  ),
+                            ),
+                          );
+                        },
+                      );
+                    },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.teal[600],
               foregroundColor: Colors.white,
@@ -643,9 +666,8 @@ class _TrekDetailViewState extends State<TrekDetailView> with TickerProviderStat
           ),
         ),
         const SizedBox(height: 12),
-        
+
         // Secondary Actions Row
-       
       ],
     );
   }

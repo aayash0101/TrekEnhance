@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_trek_e/app/constant/api_endpoint.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 import 'package:flutter_application_trek_e/features/home/domain/repository/home_repository.dart';
@@ -10,16 +11,17 @@ import 'package:flutter_application_trek_e/features/home/presentation/view_model
 class HomeView extends StatelessWidget {
   const HomeView({Key? key}) : super(key: key);
 
-  String fixImageUrl(String? url) {
-    if (url == null || url.isEmpty) return '';
-    if (url.startsWith('http')) return url;
-    return 'http://10.0.2.2:5000$url';
+  String _getFullImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) return '';
+    if (imageUrl.startsWith('http')) return imageUrl;
+    return '${ApiEndpoints.serverAddress}$imageUrl';
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => HomeViewModel(serviceLocator<IHomeRepository>())..add(LoadTreks()),
+      create: (_) =>
+          HomeViewModel(serviceLocator<IHomeRepository>())..add(LoadTreks()),
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -103,7 +105,8 @@ class HomeView extends StatelessWidget {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => TrekDetailView(trek: trek),
+                                    builder: (_) =>
+                                        TrekDetailView(trek: trek),
                                   ),
                                 );
                               },
@@ -117,27 +120,36 @@ class HomeView extends StatelessWidget {
                                         width: 80,
                                         height: 80,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                           color: Colors.grey[100],
                                         ),
                                         child: (trek.imageUrl ?? '').isNotEmpty
                                             ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(12),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                                 child: Image.network(
-                                                  fixImageUrl(trek.imageUrl),
+                                                  _getFullImageUrl(
+                                                      trek.imageUrl),
                                                   fit: BoxFit.cover,
-                                                  loadingBuilder: (context, child, loadingProgress) {
-                                                    if (loadingProgress == null) return child;
+                                                  loadingBuilder: (context,
+                                                      child, loadingProgress) {
+                                                    if (loadingProgress ==
+                                                        null) return child;
                                                     return Center(
-                                                      child: CircularProgressIndicator(
+                                                      child:
+                                                          CircularProgressIndicator(
                                                         strokeWidth: 2,
-                                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                                          Colors.grey[400]!,
-                                                        ),
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                                    Color>(
+                                                                Colors.grey[
+                                                                    400]!),
                                                       ),
                                                     );
                                                   },
-                                                  errorBuilder: (context, error, stackTrace) {
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
                                                     return Icon(
                                                       Icons.landscape_outlined,
                                                       size: 32,
@@ -156,7 +168,8 @@ class HomeView extends StatelessWidget {
                                     const SizedBox(width: 16),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             trek.name,
@@ -179,13 +192,15 @@ class HomeView extends StatelessWidget {
                                               const SizedBox(width: 4),
                                               Expanded(
                                                 child: Text(
-                                                  trek.location ?? 'Unknown location',
+                                                  trek.location ??
+                                                      'Unknown location',
                                                   style: TextStyle(
                                                     color: Colors.grey[600],
                                                     fontSize: 14,
                                                   ),
                                                   maxLines: 1,
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ),
                                             ],
@@ -219,7 +234,8 @@ class HomeView extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                        Icon(Icons.error_outline,
+                            size: 64, color: Colors.red[300]),
                         const SizedBox(height: 16),
                         Text(
                           'Oops! Something went wrong',
@@ -232,7 +248,8 @@ class HomeView extends StatelessWidget {
                         const SizedBox(height: 8),
                         Text(
                           state.message,
-                          style: TextStyle(color: Colors.red[600], fontSize: 14),
+                          style:
+                              TextStyle(color: Colors.red[600], fontSize: 14),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
@@ -243,7 +260,8 @@ class HomeView extends StatelessWidget {
                           icon: const Icon(Icons.refresh),
                           label: const Text('Try Again'),
                           style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
                         ),
                       ],

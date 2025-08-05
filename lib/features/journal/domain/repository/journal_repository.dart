@@ -34,4 +34,52 @@ abstract interface class IJournalRepository {
 
   /// Delete a journal entry by ID
   Future<Either<Failure, bool>> deleteJournal(String id);
+
+  /// Save a journal entry for offline access
+  Future<Either<Failure, bool>> saveJournal({
+    required String journalId,
+    required String userId,
+  });
+
+  /// Remove a saved journal entry
+  Future<Either<Failure, bool>> unsaveJournal({
+    required String journalId,
+    required String userId,
+  });
+
+  /// Get all saved journal entries by user
+  Future<Either<Failure, List<JournalEntity>>> getSavedJournals(String userId);
+
+  /// Check if a journal is saved by user
+  Future<Either<Failure, bool>> isJournalSaved({
+    required String journalId,
+    required String userId,
+  });
+
+  /// Add a journal to favorites
+  Future<Either<Failure, bool>> favoriteJournal({
+    required String journalId,
+    required String userId,
+  });
+
+  /// Remove a journal from favorites
+  Future<Either<Failure, bool>> unfavoriteJournal({
+    required String journalId,
+    required String userId,
+  });
+
+  /// Get all favorite journal entries by user
+  Future<Either<Failure, List<JournalEntity>>> getFavoriteJournals(String userId);
+
+  /// Check if a journal is favorited by user
+  Future<Either<Failure, bool>> isJournalFavorited({
+    required String journalId,
+    required String userId,
+  });
+
+  /// Get journals with updated save/favorite status for a specific user
+  Future<Either<Failure, List<JournalEntity>>> getJournalsWithStatus({
+    required List<JournalEntity> journals,
+    required String userId,
+  });
 }

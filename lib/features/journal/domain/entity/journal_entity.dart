@@ -10,9 +10,12 @@ class JournalEntity {
   final List<String> photos;
   final DateTime createdAt;
   final DateTime updatedAt;
-
   final UserEntity? user;
   final TrekEntity? trek;
+  
+  // These will be set based on current user's saved/favorite lists
+  bool isSaved;
+  bool isFavorite;
 
   JournalEntity({
     required this.id,
@@ -25,6 +28,8 @@ class JournalEntity {
     required this.updatedAt,
     this.user,
     this.trek,
+    this.isSaved = false,
+    this.isFavorite = false,
   });
 
   factory JournalEntity.fromJson(Map<String, dynamic> json) {
@@ -55,6 +60,10 @@ class JournalEntity {
       updatedAt: DateTime.tryParse(json['updatedAt'] ?? '') ?? DateTime.now(),
       user: (userJson is Map<String, dynamic>) ? UserEntity.fromJson(userJson) : null,
       trek: (trekJson is Map<String, dynamic>) ? TrekEntity.fromJson(trekJson) : null,
+      
+      // These will be updated after fetching user's saved/favorite lists
+      isSaved: false,
+      isFavorite: false,
     );
   }
 
@@ -69,5 +78,36 @@ class JournalEntity {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
+  }
+
+  // Helper method to create a copy with updated save/favorite status
+  JournalEntity copyWith({
+    String? id,
+    String? userId,
+    String? trekId,
+    String? date,
+    String? text,
+    List<String>? photos,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    UserEntity? user,
+    TrekEntity? trek,
+    bool? isSaved,
+    bool? isFavorite,
+  }) {
+    return JournalEntity(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      trekId: trekId ?? this.trekId,
+      date: date ?? this.date,
+      text: text ?? this.text,
+      photos: photos ?? this.photos,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      user: user ?? this.user,
+      trek: trek ?? this.trek,
+      isSaved: isSaved ?? this.isSaved,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
   }
 }
