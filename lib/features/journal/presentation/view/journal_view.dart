@@ -24,44 +24,43 @@ class _JournalViewState extends State<JournalView> {
   String get userId => _userId ?? '';
 
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
 
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    _loadUserId(); // 🔧 Run AFTER the first build
-  });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUserId();
+    });
 
-  _searchController.addListener(() {
-    final query = _searchController.text;
-    context.read<JournalViewModel>().add(FilterJournals(query));
-  });
-}
+    _searchController.addListener(() {
+      final query = _searchController.text;
+      context.read<JournalViewModel>().add(FilterJournals(query));
+    });
+  }
 
- Future<void> _loadUserId() async {
-  final usecase = UserGetCurrentUsecase(userRepository: serviceLocator<IUserRepository>());
+  Future<void> _loadUserId() async {
+    final usecase = UserGetCurrentUsecase(userRepository: serviceLocator<IUserRepository>());
 
-  final result = await usecase();
+    final result = await usecase();
 
-  result.fold(
-    (failure) {
-      print("❌ Failed to get current user: ${failure.toString()}");
-    },
-    (user) {
-      final userId = user.userId;
-      print("✅ Got userId: $userId");
+    result.fold(
+      (failure) {
+        print("❌ Failed to get current user: ${failure.toString()}");
+      },
+      (user) {
+        final userId = user.userId;
+        print("✅ Got userId: $userId");
 
-      if (userId != null && userId.isNotEmpty) {
-        setState(() {
-          _userId = userId; // ✅ Set the _userId here
-        });
-        context.read<JournalViewModel>().add(FetchAllJournals(userId));
-      } else {
-        print("❌ User ID is null or empty, cannot load journals");
-      }
-    },
-  );
-}
-
+        if (userId != null && userId.isNotEmpty) {
+          setState(() {
+            _userId = userId;
+          });
+          context.read<JournalViewModel>().add(FetchAllJournals(userId));
+        } else {
+          print("❌ User ID is null or empty, cannot load journals");
+        }
+      },
+    );
+  }
 
   @override
   void dispose() {
@@ -176,12 +175,10 @@ void initState() {
         listener: (context, state) {
           print('🔄 DEBUG: State changed to: ${state.runtimeType}');
           
-          // Handle success messages for save/favorite actions
           if (state is JournalLoaded) {
             print('✅ DEBUG: JournalLoaded - ${state.journals.length} total journals, ${state.filteredJournals.length} filtered');
           }
           
-          // Handle error states
           if (state is JournalError) {
             print('❌ DEBUG: JournalError - ${state.message}');
             ScaffoldMessenger.of(context).showSnackBar(
@@ -254,7 +251,7 @@ void initState() {
                   ElevatedButton.icon(
                     onPressed: () {
                       context.read<JournalViewModel>().add(ClearError());
-                      _loadUserId(); // Reload everything
+                      _loadUserId();
                     },
                     icon: const Icon(Icons.refresh),
                     label: const Text('Try Again'),
@@ -267,7 +264,6 @@ void initState() {
             );
           }
 
-          // Handle all loaded states (including saving/favoriting states that extend JournalLoaded)
           List<JournalEntity> journals = [];
           if (state is JournalLoaded) {
             journals = state.filteredJournals;
@@ -308,7 +304,7 @@ void initState() {
 
           return RefreshIndicator(
             onRefresh: () async {
-              await _loadUserId(); // This will reload everything
+              await _loadUserId();
             },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -364,7 +360,7 @@ void initState() {
                                 ],
                               ),
                             ),
-                            // Action buttons
+                            // Action buttons - Simple and responsive
                             Row(
                               children: [
                                 // Save button
@@ -379,19 +375,19 @@ void initState() {
                                       padding: const EdgeInsets.all(8),
                                       child: _isSaving(journal.id!, state)
                                           ? SizedBox(
-                                              width: 16,
-                                              height: 16,
+                                              width: 20,
+                                              height: 20,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 2,
                                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                                  Colors.grey[400]!,
+                                                  Colors.orange,
                                                 ),
                                               ),
                                             )
                                           : Icon(
                                               journal.isSaved ? Icons.bookmark : Icons.bookmark_border,
                                               color: journal.isSaved ? Colors.orange : Colors.grey[600],
-                                              size: 22,
+                                              size: 24,
                                             ),
                                     ),
                                   ),
@@ -409,19 +405,19 @@ void initState() {
                                       padding: const EdgeInsets.all(8),
                                       child: _isFavoriting(journal.id!, state)
                                           ? SizedBox(
-                                              width: 16,
-                                              height: 16,
+                                              width: 20,
+                                              height: 20,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 2,
                                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                                  Colors.grey[400]!,
+                                                  Colors.red,
                                                 ),
                                               ),
                                             )
                                           : Icon(
                                               journal.isFavorite ? Icons.favorite : Icons.favorite_border,
                                               color: journal.isFavorite ? Colors.red : Colors.grey[600],
-                                              size: 22,
+                                              size: 24,
                                             ),
                                     ),
                                   ),

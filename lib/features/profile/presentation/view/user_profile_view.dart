@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_trek_e/app/service_locator/service_locator.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_favorite_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/use_case/get_saved_journal_usecase.dart';
+import 'package:flutter_application_trek_e/features/journal/presentation/view/favorite_journals_view.dart';
+import 'package:flutter_application_trek_e/features/journal/presentation/view/saved_journals_view.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view/edit_user_profile_view.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_event.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_state.dart';
 import 'package:flutter_application_trek_e/features/profile/presentation/view_model/user_profile_view_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/domain/entity/user_entity.dart';
+import '../../../journal/domain/entity/journal_entity.dart';
+// Import your saved and favorite journal views
+
 
 class UserProfileView extends StatelessWidget {
   final String userId;
@@ -15,8 +22,11 @@ class UserProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          UserProfileViewModel(serviceLocator<IUserRepository>())..add(LoadUserProfile(userId)),
+      create: (_) => UserProfileViewModel(
+        serviceLocator<IUserRepository>(),
+        serviceLocator<GetSavedJournalsUseCase>(),
+        serviceLocator<GetFavoriteJournalsUseCase>(),
+      )..add(LoadUserProfile(userId)),
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         body: BlocBuilder<UserProfileViewModel, UserProfileState>(
@@ -25,7 +35,9 @@ class UserProfileView extends StatelessWidget {
               return _buildLoadingState();
             } else if (state is UserProfileLoaded) {
               final user = state.user;
-              return _buildProfileView(context, user);
+              final savedJournals = state.savedJournals;
+              final favoriteJournals = state.favoriteJournals;
+              return _buildProfileView(context, user, savedJournals, favoriteJournals);
             } else if (state is UserProfilePictureUploading) {
               return _buildUploadingState();
             } else if (state is UserProfileError) {
@@ -150,7 +162,12 @@ class UserProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileView(BuildContext context, UserEntity user) {
+  Widget _buildProfileView(
+    BuildContext context, 
+    UserEntity user, 
+    List<JournalEntity> savedJournals, 
+    List<JournalEntity> favoriteJournals
+  ) {
     // Build full image URL if profileImageUrl is set
     final imageUrl = user.profileImageUrl;
     final fullImageUrl = (imageUrl != null && imageUrl.isNotEmpty)
@@ -322,6 +339,63 @@ class UserProfileView extends StatelessWidget {
                     isEmpty: user.location == null || user.location!.isEmpty,
                   ),
                   const SizedBox(height: 32),
+
+                  // Journal Statistics Section
+                  const Text(
+                    'Journal Statistics',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Statistics Cards Row with Navigation
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          icon: Icons.bookmark_outline,
+                          title: 'Saved Journals',
+                          count: savedJournals.length,
+                          color: Colors.blue,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SavedJournalsView(
+                                  savedJournals: savedJournals,
+                                  username: user.username,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          icon: Icons.favorite_outline,
+                          title: 'Favorite Journals',
+                          count: favoriteJournals.length,
+                          color: Colors.red,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FavoriteJournalsView(
+                                  favoriteJournals: favoriteJournals,
+                                  username: user.username,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
                   
                   // Action Buttons
                   const Text(
@@ -480,6 +554,79 @@ class UserProfileView extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String title,
+    required int count,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withOpacity(0.2),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                count.toString(),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              if (onTap != null)
+                Text(
+                  'Tap to view',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: color.withOpacity(0.7),
+                    fontWeight: FontWeight.w400,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/model/user_hive_model.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 import 'package:flutter_application_trek_e/core/network/hive_service.dart';
 
 class UserLocalDataSource implements IUserDataSource {
@@ -62,5 +63,25 @@ class UserLocalDataSource implements IUserDataSource {
   @override
   Future<void> logout() async {
     await hiveService.clearUserData();
+  }
+
+  // === Added methods for saved and favorite journals ===
+
+  Future<List<JournalEntity>> getSavedJournals() async {
+    try {
+      final savedJournals = await hiveService.getSavedJournals();
+      return savedJournals.map((journal) => journal.toEntity()).toList();
+    } catch (e) {
+      throw Exception("Failed to fetch saved journals: $e");
+    }
+  }
+
+  Future<List<JournalEntity>> getFavoriteJournals() async {
+    try {
+      final favoriteJournals = await hiveService.getFavoriteJournals();
+      return favoriteJournals.map((journal) => journal.toEntity()).toList();
+    } catch (e) {
+      throw Exception("Failed to fetch favorite journals: $e");
+    }
   }
 }

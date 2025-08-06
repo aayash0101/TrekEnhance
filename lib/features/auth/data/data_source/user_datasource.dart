@@ -1,27 +1,21 @@
 import 'dart:io';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 
-abstract interface class IUserDataSource {
-  /// Register a new user
-  Future<void> registerUser(UserEntity userData);
-
-  /// Login and get token
+abstract class IUserDataSource {
   Future<String> loginUser(String username, String password);
-
-  /// Upload profile picture and get filename or URL
+  Future<void> registerUser(UserEntity userData);
   Future<String> uploadProfilePicture(File file);
-
-  /// Get current logged-in user data
   Future<UserEntity> getCurrentUser();
-
-  /// Update user profile and get updated user
   Future<UserEntity> updateUserProfile({
     required String username,
     String? bio,
     String? location,
     String? profileImageUrl,
   });
-
-  /// Logout user (clear local session or call backend logout)
   Future<void> logout();
+
+  // New methods for journals
+  Future<List<JournalEntity>> getSavedJournals();
+  Future<List<JournalEntity>> getFavoriteJournals();
 }

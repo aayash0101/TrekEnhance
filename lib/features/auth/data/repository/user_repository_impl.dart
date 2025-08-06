@@ -4,6 +4,7 @@ import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 
 class UserRepositoryImpl implements IUserRepository {
   final IUserDataSource remoteDataSource;
@@ -19,10 +20,8 @@ class UserRepositoryImpl implements IUserRepository {
     try {
       await remoteDataSource.registerUser(user);
       try {
-        await localDataSource.registerUser(user); // Cache locally
-      } catch (_) {
-        // Ignore local cache failure
-      }
+        await localDataSource.registerUser(user);
+      } catch (_) {}
       return const Right(null);
     } catch (e) {
       return Left(RemoteDatabaseFailure(message: e.toString()));
@@ -55,11 +54,10 @@ class UserRepositoryImpl implements IUserRepository {
       final user = await localDataSource.getCurrentUser();
       return Right(user);
     } catch (_) {
-      // fallback to remote
       try {
         final user = await remoteDataSource.getCurrentUser();
         try {
-          await localDataSource.registerUser(user); // update cache
+          await localDataSource.registerUser(user);
         } catch (_) {}
         return Right(user);
       } catch (e) {
@@ -83,7 +81,7 @@ class UserRepositoryImpl implements IUserRepository {
         profileImageUrl: profileImageUrl,
       );
       try {
-        await localDataSource.registerUser(updatedUser); // update cache
+        await localDataSource.registerUser(updatedUser);
       } catch (_) {}
       return Right(updatedUser);
     } catch (e) {
@@ -92,13 +90,32 @@ class UserRepositoryImpl implements IUserRepository {
   }
 
   @override
-  Future<Either<Failure, void>> logout() async {
+  Future<void> logout() async {
     try {
-      // Clear local storage/session
       await localDataSource.logout();
-      return const Right(null);
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  /// ✅ New implementations
+  @override
+  Future<Either<Failure, List<JournalEntity>>> getSavedJournals() async {
+    try {
+      final journals = await remoteDataSource.getSavedJournals();
+      return Right(journals);
     } catch (e) {
-      return Left(LocalDatabaseFailure(message: e.toString()));
+      return Left(RemoteDatabaseFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<JournalEntity>>> getFavoriteJournals() async {
+    try {
+      final journals = await remoteDataSource.getFavoriteJournals();
+      return Right(journals);
+    } catch (e) {
+      return Left(RemoteDatabaseFailure(message: e.toString()));
     }
   }
 }

@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
+import 'package:flutter_application_trek_e/features/auth/data/repository/remote_repository/user_remote_repository.dart'
+    as remoteDataSource;
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 
 class UserRemoteRepository implements IUserRepository {
   final IUserDataSource remoteDataSource;
@@ -22,7 +25,10 @@ class UserRemoteRepository implements IUserRepository {
   }
 
   @override
-  Future<Either<Failure, String>> loginUser(String username, String password) async {
+  Future<Either<Failure, String>> loginUser(
+    String username,
+    String password,
+  ) async {
     try {
       final token = await remoteDataSource.loginUser(username, password);
       return Right(token);
@@ -39,7 +45,9 @@ class UserRemoteRepository implements IUserRepository {
       return Right(imageName);
     } catch (e, stackTrace) {
       print('❌ uploadProfilePicture failed: $e\n$stackTrace');
-      return Left(RemoteDatabaseFailure(message: "Failed to upload picture: $e"));
+      return Left(
+        RemoteDatabaseFailure(message: "Failed to upload picture: $e"),
+      );
     }
   }
 
@@ -59,7 +67,7 @@ class UserRemoteRepository implements IUserRepository {
     required String username,
     String? bio,
     String? location,
-    String? profileImageUrl
+    String? profileImageUrl,
   }) async {
     try {
       final updatedUser = await remoteDataSource.updateUserProfile(
@@ -71,7 +79,35 @@ class UserRemoteRepository implements IUserRepository {
       return Right(updatedUser);
     } catch (e, stackTrace) {
       print('❌ updateUserProfile failed: $e\n$stackTrace');
-      return Left(RemoteDatabaseFailure(message: "Failed to update profile: $e"));
+      return Left(
+        RemoteDatabaseFailure(message: "Failed to update profile: $e"),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<JournalEntity>>> getSavedJournals() async {
+    try {
+      final journals = await remoteDataSource.getSavedJournals();
+      return Right(journals);
+    } catch (e, stackTrace) {
+      print('❌ getSavedJournals failed: $e\n$stackTrace');
+      return Left(
+        RemoteDatabaseFailure(message: "Failed to fetch saved journals: $e"),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<JournalEntity>>> getFavoriteJournals() async {
+    try {
+      final journals = await remoteDataSource.getFavoriteJournals();
+      return Right(journals);
+    } catch (e, stackTrace) {
+      print('❌ getFavoriteJournals failed: $e\n$stackTrace');
+      return Left(
+        RemoteDatabaseFailure(message: "Failed to fetch favorite journals: $e"),
+      );
     }
   }
 

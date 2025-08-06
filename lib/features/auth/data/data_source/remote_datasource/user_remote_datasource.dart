@@ -6,6 +6,8 @@ import 'package:flutter_application_trek_e/core/network/hive_service.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/user_datasource.dart';
 import 'package:flutter_application_trek_e/features/auth/data/model/user_api_model.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
+import 'package:flutter_application_trek_e/features/journal/data/model/journal_api_model.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 
 class UserRemoteDataSource implements IUserDataSource {
   final ApiService apiService;
@@ -147,13 +149,54 @@ class UserRemoteDataSource implements IUserDataSource {
     }
   }
 
- @override
-Future<void> logout() async {
-  try {
-    // No backend logout call, just clear local stored data
-    await hiveService.clearUserData();
-  } catch (e) {
-    throw Exception('Logout failed: $e');
+  @override
+  Future<void> logout() async {
+    try {
+      await hiveService.clearUserData();
+    } catch (e) {
+      throw Exception('Logout failed: $e');
+    }
   }
-}
+
+  // New methods for journals
+
+  @override
+  Future<List<JournalEntity>> getSavedJournals() async {
+    try {
+      final userId = await hiveService.getUserId();
+      if (userId == null) throw Exception('User ID not found');
+
+      final url = ApiEndpoints.userBaseUrl + ApiEndpoints.getSavedJournalsByUserId(userId);
+      final response = await apiService.dio.get(url);
+
+      if (response.statusCode == 200) {
+        final dataList = response.data['data'] as List<dynamic>? ?? [];
+        return dataList.map((e) => JournalApiModel.fromJson(e).toEntity()).toList();
+      } else {
+        throw Exception('Failed to get saved journals: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to get saved journals: ${e.message}');
+    }
+  }
+
+  @override
+  Future<List<JournalEntity>> getFavoriteJournals() async {
+    try {
+      final userId = await hiveService.getUserId();
+      if (userId == null) throw Exception('User ID not found');
+
+      final url = ApiEndpoints.userBaseUrl + ApiEndpoints.getFavoriteJournalsByUserId(userId);
+      final response = await apiService.dio.get(url);
+
+      if (response.statusCode == 200) {
+        final dataList = response.data['data'] as List<dynamic>? ?? [];
+        return dataList.map((e) => JournalApiModel.fromJson(e).toEntity()).toList();
+      } else {
+        throw Exception('Failed to get favorite journals: ${response.statusMessage}');
+      }
+    } on DioException catch (e) {
+      throw Exception('Failed to get favorite journals: ${e.message}');
+    }
+  }
 }

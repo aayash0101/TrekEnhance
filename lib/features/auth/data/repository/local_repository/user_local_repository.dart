@@ -2,14 +2,17 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_application_trek_e/core/error/failure.dart';
 import 'package:flutter_application_trek_e/features/auth/data/data_source/local_datasource/user_local_datasource.dart';
+import 'package:flutter_application_trek_e/features/auth/data/repository/local_repository/user_local_repository.dart'
+    as _userLocalDatasource;
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/repository/user_repository.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 
 class UserLocalRepository implements IUserRepository {
   final UserLocalDataSource _userLocalDatasource;
 
   UserLocalRepository({required UserLocalDataSource userLocalDatasource})
-      : _userLocalDatasource = userLocalDatasource;
+    : _userLocalDatasource = userLocalDatasource;
 
   @override
   Future<Either<Failure, void>> registerUser(UserEntity user) async {
@@ -22,7 +25,10 @@ class UserLocalRepository implements IUserRepository {
   }
 
   @override
-  Future<Either<Failure, String>> loginUser(String username, String password) async {
+  Future<Either<Failure, String>> loginUser(
+    String username,
+    String password,
+  ) async {
     try {
       final result = await _userLocalDatasource.loginUser(username, password);
       return Right(result);
@@ -37,7 +43,9 @@ class UserLocalRepository implements IUserRepository {
       final imageName = await _userLocalDatasource.uploadProfilePicture(file);
       return Right(imageName);
     } catch (e) {
-      return Left(LocalDatabaseFailure(message: "Failed to upload picture: $e"));
+      return Left(
+        LocalDatabaseFailure(message: "Failed to upload picture: $e"),
+      );
     }
   }
 
@@ -63,11 +71,37 @@ class UserLocalRepository implements IUserRepository {
         username: username,
         bio: bio,
         location: location,
-        profileImageUrl: profileImageUrl
+        profileImageUrl: profileImageUrl,
       );
       return Right(updatedUser);
     } catch (e) {
-      return Left(LocalDatabaseFailure(message: "Failed to update profile: $e"));
+      return Left(
+        LocalDatabaseFailure(message: "Failed to update profile: $e"),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<JournalEntity>>> getSavedJournals() async {
+    try {
+      final journals = await _userLocalDatasource.getSavedJournals();
+      return Right(journals);
+    } catch (e) {
+      return Left(
+        LocalDatabaseFailure(message: "Failed to fetch saved journals: $e"),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<JournalEntity>>> getFavoriteJournals() async {
+    try {
+      final journals = await _userLocalDatasource.getFavoriteJournals();
+      return Right(journals);
+    } catch (e) {
+      return Left(
+        LocalDatabaseFailure(message: "Failed to fetch favorite journals: $e"),
+      );
     }
   }
 

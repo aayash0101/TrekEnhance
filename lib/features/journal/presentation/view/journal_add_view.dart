@@ -227,7 +227,7 @@ class _AddJournalViewState extends State<AddJournalView> with TickerProviderStat
       // Use Dio directly since your use case likely just wraps a Dio call.
       final dio = Dio();
       final response = await dio.post(
-        'http://YOUR_BACKEND_BASE_URL/journal', // Change to your actual backend URL
+        'http://0.0.0.0:5000/journal', // Change to your actual backend URL
         data: formData,
         options: Options(
           headers: {

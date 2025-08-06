@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_application_trek_e/features/auth/domain/entity/user_entity.dart';
+import 'package:flutter_application_trek_e/features/journal/domain/entity/journal_entity.dart';
 
 abstract class UserProfileState extends Equatable {
   const UserProfileState();
@@ -14,11 +15,13 @@ class UserProfileLoading extends UserProfileState {}
 
 class UserProfileLoaded extends UserProfileState {
   final UserEntity user;
-
-  const UserProfileLoaded(this.user);
+  final List<JournalEntity> savedJournals;
+  final List<JournalEntity> favoriteJournals;
+  
+  const UserProfileLoaded(this.user, this.savedJournals, this.favoriteJournals);
 
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [user, savedJournals, favoriteJournals];
 }
 
 class UserProfileError extends UserProfileState {

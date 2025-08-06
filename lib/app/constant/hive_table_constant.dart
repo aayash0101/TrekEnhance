@@ -16,4 +16,8 @@ class HiveTableConstant {
   // Reviews (optional, if you cache them separately)
   static const int reviewTableId = 3;
   static const String reviewBox = 'reviewBox';
+
+  // Saved and Favorite Journals
+  static const String savedJournalBox = 'saved_journals';
+  static const String favoriteJournalBox = 'favorite_journals';
 }
